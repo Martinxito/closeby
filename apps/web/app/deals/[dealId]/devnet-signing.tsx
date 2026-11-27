@@ -161,26 +161,25 @@ export default function DevnetSigning() {
   }
 
   return (
-    <section>
-      <h2>Prueba de firma · Devnet</h2>
+    <section className="signing-panel" aria-label="Firma de prueba en Devnet">
       <p>Activa Devnet en Phantom. La prueba usa SOL de prueba para pagar la comisión.</p>
       {wallet ? (
-        <button type="button" onClick={sign} disabled={status === 'signing' || status === 'submitted' || status === 'confirmed'}>
+        <button className="button button-primary" type="button" onClick={sign} disabled={status === 'signing' || status === 'submitted' || status === 'confirmed'}>
           Firmar prueba en Phantom
         </button>
       ) : browseUrl ? (
-        <a href={browseUrl}>Abrir este trato en Phantom</a>
+        <a className="button button-primary" href={browseUrl}>Abrir este trato en Phantom <span aria-hidden="true">↗</span></a>
       ) : (
         <p>Abre el enlace HTTPS de este trato en el navegador de Phantom.</p>
       )}
       <p role="status">{statusCopy[status]}</p>
       {dealUrl && (
-        <div>
+        <div className="deal-share">
           <label>
             Enlace del trato
             <input value={dealUrl} readOnly onFocus={(event) => event.currentTarget.select()} />
           </label>
-          <button type="button" onClick={copyLink}>{copied ? 'Enlace copiado' : 'Copiar enlace'}</button>
+          <button className="button" type="button" onClick={copyLink}>{copied ? 'Enlace copiado' : 'Copiar enlace'}</button>
           {qrUrl && <img src={qrUrl} alt="Código QR del enlace del trato" width={192} height={192} />}
         </div>
       )}

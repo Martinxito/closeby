@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import SiteHeader from '../../site-header';
 import DevnetSigning from './devnet-signing';
 
 export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>) {
@@ -9,15 +9,20 @@ export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>)
     notFound();
   }
 
+  const isTest = dealId === 'devnet-signing';
+
   return (
-    <main>
-      <Link href="/">Closeby</Link>
-      <h1>Trato {dealId}</h1>
-      {dealId === 'devnet-signing' ? (
-        <DevnetSigning />
-      ) : (
-        <p>La consulta de tratos todavía está en desarrollo.</p>
-      )}
-    </main>
+    <>
+      <SiteHeader deal />
+      <main className="page-width deal-page">
+        <p className="eyebrow">{isTest ? 'Devnet · Red de prueba' : 'Closeby · Trato'}</p>
+        <h1>{isTest ? 'Prueba de firma.' : `Trato ${dealId}`}</h1>
+        {isTest ? (
+          <DevnetSigning />
+        ) : (
+          <p>La consulta de tratos todavía está en desarrollo.</p>
+        )}
+      </main>
+    </>
   );
 }
