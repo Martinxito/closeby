@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { formatClp, getDeal, isDealId } from '@/lib/deals';
+import { getDeal, isDealId } from '@/lib/deals';
+import { formatClp } from '@/lib/format';
 
 export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>) {
   const { dealId } = await params;

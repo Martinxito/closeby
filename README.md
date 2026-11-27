@@ -27,15 +27,20 @@ Open http://localhost:3000. The initial `/deals/[dealId]` route is a public URL 
 
 Product details, photos and the exact venue live off-chain in Supabase; Solana only stores the venue's SHA-256 hash and the escrow state.
 
-1. In the Supabase dashboard, open SQL Editor and run [`supabase/migrations/0001_deals.sql`](supabase/migrations/0001_deals.sql). It creates the `deals` table, its RLS policies and the public `photos` storage bucket.
-2. Copy `apps/web/.env.example` to `apps/web/.env.local` and fill in the values from Project Settings → API.
+The browser never talks to the database. Only the Next.js server reads and writes, with the secret key; the anon and authenticated roles have no privileges, so the publishable key cannot access any data.
+
+1. In Project Settings → Data API, enable the Data API with `public` as an exposed schema.
+2. Open SQL Editor and run, in order:
+   - [`supabase/migrations/0001_deals.sql`](supabase/migrations/0001_deals.sql): creates the `deals` table and the `photos` storage bucket.
+   - [`supabase/migrations/0002_server_only_access.sql`](supabase/migrations/0002_server_only_access.sql): removes all public access to `deals` and anonymous photo uploads.
+3. Copy `apps/web/.env.example` to `apps/web/.env.local` and fill in:
 
 | Variable | Value |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publishable (anon) key. Never use the service_role key in the web app. |
+| `SUPABASE_URL` | Project URL (`https://<project-id>.supabase.co`) |
+| `SUPABASE_SECRET_KEY` | Secret key (`sb_secret_...`). Server-only: never prefix it with `NEXT_PUBLIC_`. |
 
-Set the same variables in the Vercel project.
+Set the same variables in the Vercel project (Production and Preview).
 
 ## Hosted demo
 
