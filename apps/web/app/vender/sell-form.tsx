@@ -35,7 +35,7 @@ export function SellForm() {
     return (
       <section className="card">
         <p>Entra para publicar tu venta. Te avisamos cuando alguien compre.</p>
-        <button type="button" className="button" onClick={() => wallet.login()}>
+        <button type="button" className="button button-primary" onClick={() => wallet.login()}>
           Entrar
         </button>
       </section>
@@ -144,7 +144,7 @@ export function SellForm() {
         </p>
       )}
 
-      <button className="button" type="submit" disabled={busy || !file || priceClp < 1000}>
+      <button className="button button-primary" type="submit" disabled={busy || !file || priceClp < 1000}>
         {STEP_LABEL[step]}
       </button>
       <small className="muted">
