@@ -38,6 +38,10 @@ jobs:
       - name: Typecheck
         run: pnpm --filter @closeby/web typecheck
 
+      # Escrow rules (lib/escrow/rules.ts), including the cases that must be rejected.
+      - name: Unit tests
+        run: pnpm --filter @closeby/web test
+
       # The build needs no secrets: /deals/[dealId] is rendered on demand, so Supabase
       # is never called at build time.
       - name: Build
