@@ -27,11 +27,11 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
   return (
     <div className="stack">
       <input className="link-box" readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Link de tu venta" />
-      <button type="button" className="button" onClick={copy}>
+      <button type="button" className="button button-primary" onClick={copy}>
         {copied ? '¡Link copiado!' : 'Copiar link'}
       </button>
       {canShare && (
-        <button type="button" className="button secondary" onClick={share}>
+        <button type="button" className="button" onClick={share}>
           Compartir por WhatsApp u otra app
         </button>
       )}

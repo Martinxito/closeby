@@ -5,12 +5,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Closeby',
-  description: 'Reserva el pago antes de juntarte y confirma al revisar el producto.',
+  description: 'Vende y compra archivos con pago protegido: el vendedor recibe la plata cuando el comprador confirma.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es-CL">
+    <html lang="es-CL" data-scroll-behavior="smooth">
       <body>
         <WalletProvider>{children}</WalletProvider>
       </body>

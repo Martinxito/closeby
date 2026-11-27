@@ -31,7 +31,7 @@ export function TestBalance() {
     return (
       <section className="card stack">
         <small className="muted">Entra para ver tu saldo y comprar o vender.</small>
-        <button type="button" className="button secondary" onClick={() => wallet.login()}>
+        <button type="button" className="button" onClick={() => wallet.login()}>
           Entrar
         </button>
       </section>
@@ -63,7 +63,7 @@ export function TestBalance() {
           {error}
         </p>
       )}
-      <button type="button" className="button secondary" onClick={topUp} disabled={loading}>
+      <button type="button" className="button" onClick={topUp} disabled={loading}>
         {loading ? 'Cargando…' : 'Cargar saldo de prueba'}
       </button>
       <small className="muted">Plata de prueba para la demo. No es plata real.</small>

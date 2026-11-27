@@ -9,6 +9,7 @@ import type { Order } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
 import { AutoRefresh } from './auto-refresh';
 import { ShareActions } from './share-actions';
+import SiteHeader from '../../site-header';
 
 export const metadata: Metadata = { title: 'Comparte tu venta | Closeby' };
 
@@ -28,28 +29,30 @@ export default async function SharePage({ params }: PageProps<'/vender/[dealId]'
   const qrSvg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
 
   return (
-    <main className="stack">
-      <Link href="/">Closeby</Link>
-      <h1>{order?.status === 'Created' ? '¡Tu venta está publicada!' : 'Tu venta'}</h1>
-      <section className="card stack">
-        <strong>{deal.title}</strong>
-        <span>{formatClp(deal.price_clp)}</span>
-      </section>
+    <>
+      <SiteHeader deal />
+      <main className="app-page stack">
+        <h1>{order?.status === 'Created' ? '¡Tu venta está publicada!' : 'Tu venta'}</h1>
+        <section className="card stack">
+          <strong>{deal.title}</strong>
+          <span>{formatClp(deal.price_clp)}</span>
+        </section>
 
-      <section className="card stack" aria-live="polite">
-        <strong>{status.title}</strong>
-        <small className="muted">{status.detail}</small>
-      </section>
-      {!finished && <AutoRefresh />}
+        <section className="card stack" aria-live="polite">
+          <strong>{status.title}</strong>
+          <small className="muted">{status.detail}</small>
+        </section>
+        {!finished && <AutoRefresh />}
 
-      {order?.status === 'Created' && <ShareActions url={url} title={deal.title} />}
+        {order?.status === 'Created' && <ShareActions url={url} title={deal.title} />}
 
-      {order?.status === 'Created' && (
-        <figure className="qr" aria-label="Código QR del link de tu venta" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-      )}
+        {order?.status === 'Created' && (
+          <figure className="qr" aria-label="Código QR del link de tu venta" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+        )}
 
-      <Link href={`/deals/${dealId}`}>Ver cómo la ve el comprador</Link>
-    </main>
+        <Link href={`/deals/${dealId}`}>Ver cómo la ve el comprador</Link>
+      </main>
+    </>
   );
 }
 
