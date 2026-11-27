@@ -13,6 +13,7 @@
 // Actions return { ok: false, error } instead of throwing, because Next.js hides thrown
 // error messages in production and the seller needs to read what went wrong.
 
+import { authenticateToken } from '@/lib/auth/server';
 import { insertDigitalDeal, isDealId } from '@/lib/deals';
 import { newOrderId } from '@/lib/escrow/ids';
 import { getOrder } from '@/lib/escrow/server';
@@ -63,7 +64,8 @@ export async function prepareSale(input: PrepareSaleInput): Promise<Result<{ dea
 
 export type PublishSaleInput = {
   dealId: string;
-  seller: string;
+  /** Session token from wallet.getAccessToken(); the seller is whoever it proves. */
+  accessToken: string | null;
   title: string;
   description: string;
   priceClp: number;
@@ -91,10 +93,13 @@ export async function publishSale(input: PublishSaleInput): Promise<Result<{ dea
     return { ok: false, error: 'Archivo no válido.' };
   }
 
+  const seller = await authenticateToken(input.accessToken);
+  if (!seller) return { ok: false, error: 'Tu sesión expiró. Vuelve a entrar.' };
+
   try {
     // 1. The escrow order must exist, belong to this seller, and match price and file.
     const order = await getOrder(input.dealId);
-    if (!order || order.seller !== input.seller) return { ok: false, error: 'No encontramos tu venta. Intenta de nuevo.' };
+    if (!order || order.seller !== seller) return { ok: false, error: 'No encontramos tu venta. Intenta de nuevo.' };
     if (order.amount !== clpToUsdcUnits(input.priceClp)) return { ok: false, error: 'El precio no coincide con tu venta.' };
 
     // 2. Recompute the hash from what is actually stored, and compare with the order.

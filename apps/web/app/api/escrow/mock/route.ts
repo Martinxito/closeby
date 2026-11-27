@@ -1,6 +1,7 @@
 // Mock escrow endpoint: stands in for sending a transaction to the Solana program.
 // Only active when ESCROW_MODE is "mock" (the default until the program is on Devnet).
 import { NextResponse } from 'next/server';
+import { authenticate } from '@/lib/auth/server';
 import { escrowMode, runMockAction } from '@/lib/escrow/server';
 import { EscrowError, type EscrowAction, type EscrowActionType } from '@/lib/escrow/types';
 
@@ -19,7 +20,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: { code: 'NotFound', message: 'Mock escrow is disabled.' } }, { status: 404 });
   }
 
-  const action = parseAction(await request.json().catch(() => null));
+  // The signer is whoever the session token says, like a real signature would prove.
+  // The body's `signer` is ignored.
+  const signer = await authenticate(request);
+  if (!signer) {
+    return NextResponse.json({ error: { code: 'Unauthorized', message: 'Log in first.' } }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => null);
+  const action = parseAction(body && typeof body === 'object' ? { ...body, signer } : null);
   if (!action) {
     return NextResponse.json({ error: { code: 'BadRequest', message: 'Invalid action.' } }, { status: 400 });
   }

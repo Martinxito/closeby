@@ -18,4 +18,11 @@ export type Wallet = {
    * Used only in chain mode; the mock escrow does not need it.
    */
   signTransaction: (transactionBase64: string) => Promise<string>;
+  /**
+   * Proof of who the user is, for our own server (sent as `Authorization: Bearer <token>`).
+   * An address alone proves nothing: addresses are public on-chain. Privy: its access
+   * token, verified in lib/auth/server.ts. Mock: a token signed by our server at login.
+   * Null when logged out.
+   */
+  getAccessToken: () => Promise<string | null>;
 };

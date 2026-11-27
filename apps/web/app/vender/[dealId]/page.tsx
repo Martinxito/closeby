@@ -4,7 +4,10 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import QRCode from 'qrcode';
 import { getDeal, isDealId } from '@/lib/deals';
+import { getOrder } from '@/lib/escrow/server';
+import type { Order } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
+import { AutoRefresh } from './auto-refresh';
 import { ShareActions } from './share-actions';
 
 export const metadata: Metadata = { title: 'Comparte tu venta | Closeby' };
@@ -15,8 +18,10 @@ export default async function SharePage({ params }: PageProps<'/vender/[dealId]'
   const { dealId } = await params;
   if (!isDealId(dealId)) notFound();
 
-  const deal = await getDeal(dealId);
+  const [deal, order] = await Promise.all([getDeal(dealId), getOrder(dealId)]);
   if (!deal) notFound();
+  const status = sellerStatus(order, deal.price_clp);
+  const finished = order?.status === 'Released' || order?.status === 'Refunded';
 
   const url = `${await origin()}/deals/${dealId}`;
   // Rendered on the server as inline SVG: no QR code library is shipped to the browser.
@@ -25,22 +30,63 @@ export default async function SharePage({ params }: PageProps<'/vender/[dealId]'
   return (
     <main className="stack">
       <Link href="/">Closeby</Link>
-      <h1>¡Tu venta está publicada!</h1>
+      <h1>{order?.status === 'Created' ? '¡Tu venta está publicada!' : 'Tu venta'}</h1>
       <section className="card stack">
         <strong>{deal.title}</strong>
         <span>{formatClp(deal.price_clp)}</span>
-        <small className="muted">
-          Comparte el link con tu comprador. Paga con pago protegido y recibe el archivo; se te paga cuando confirma.
-        </small>
       </section>
 
-      <ShareActions url={url} title={deal.title} />
+      <section className="card stack" aria-live="polite">
+        <strong>{status.title}</strong>
+        <small className="muted">{status.detail}</small>
+      </section>
+      {!finished && <AutoRefresh />}
 
-      <figure className="qr" aria-label="Código QR del link de tu venta" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+      {order?.status === 'Created' && <ShareActions url={url} title={deal.title} />}
+
+      {order?.status === 'Created' && (
+        <figure className="qr" aria-label="Código QR del link de tu venta" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+      )}
 
       <Link href={`/deals/${dealId}`}>Ver cómo la ve el comprador</Link>
     </main>
   );
+}
+
+/** What the seller sees for each escrow status (docs/flows/digital-sale.md, "Status shown to users"). */
+function sellerStatus(order: Order | null, priceClp: number): { title: string; detail: string } {
+  const price = formatClp(priceClp);
+  switch (order?.status) {
+    case 'Created':
+      return { title: 'Esperando comprador', detail: 'Comparte el link. Te avisamos aquí cuando alguien compre.' };
+    case 'Funded':
+      return {
+        title: `Un comprador reservó ${price}`,
+        detail: `Su plata está protegida. Se te paga cuando confirme que recibió el archivo. Si no lo desbloquea antes del ${formatDeadline(order.claimDeadline)}, se le devuelve.`,
+      };
+    case 'Delivered':
+      return {
+        title: 'El comprador ya tiene tu archivo',
+        detail: `Se te paga cuando confirme, o automáticamente el ${formatDeadline(order.releaseDeadline)}.`,
+      };
+    case 'Released':
+      return { title: `✅ Te pagaron ${price}`, detail: 'Trato hecho.' };
+    case 'Refunded':
+      return { title: 'La compra se canceló', detail: 'Le devolvimos la plata al comprador antes de que recibiera el archivo.' };
+    default:
+      return { title: 'Preparando tu venta…', detail: 'Recarga en unos segundos.' };
+  }
+}
+
+function formatDeadline(unixSecs: number | null): string {
+  if (!unixSecs) return '—';
+  return new Intl.DateTimeFormat('es-CL', {
+    weekday: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Santiago',
+  }).format(new Date(unixSecs * 1000));
 }
 
 /** Public origin of this request (works on localhost and on Vercel previews). */

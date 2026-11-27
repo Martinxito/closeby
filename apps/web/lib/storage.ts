@@ -49,3 +49,10 @@ export function safeFileName(name: string): string {
     .slice(-100);
   return cleaned || 'archivo';
 }
+
+/** Short-lived download link for a private file, saved under its original name. */
+export async function createSignedDownload(bucket: string, path: string, fileName: string, expiresInSecs = 300): Promise<string> {
+  const { data, error } = await getSupabase().storage.from(bucket).createSignedUrl(path, expiresInSecs, { download: fileName });
+  if (error || !data) throw new Error(`Could not create download URL for ${bucket}/${path}: ${error?.message}`);
+  return data.signedUrl;
+}
