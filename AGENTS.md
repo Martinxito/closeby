@@ -58,6 +58,15 @@ CLAUDE.md / AGENTS.md     # Este contexto (mismo contenido)
 
 Una rama por persona; se integra a `main` en los puntos de sincronización.
 
+### Equipo
+
+| Quién | Área | Carpetas |
+|---|---|---|
+| Martín y Diego | Aplicación (frontend Next.js) | `app/` |
+| Alex y Aaron | Backend (programa Anchor y sus tests) | `programs/trato_hecho/`, `tests/` |
+
+El agente de IA (`app/api/agente/`) no tiene responsable asignado: se decide el sábado 13:00.
+
 ## Stack
 
 - Programa: **Rust + Anchor**, Solana **devnet**.
