@@ -22,6 +22,12 @@ alter table public.deals
   -- Public preview (image, audio clip, first page) in the "previews" bucket.
   add column if not exists preview_url text;
 
+-- Deals created before this migration have no file: they are in-person deals.
+-- (The new column defaults to 'digital', which would make them break the rule below.)
+update public.deals
+set kind = 'physical'
+where kind = 'digital' and (content_hash is null or file_path is null);
+
 -- A digital deal must say which file it sells.
 alter table public.deals drop constraint if exists deals_digital_has_file;
 alter table public.deals add constraint deals_digital_has_file
