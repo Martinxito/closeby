@@ -16,7 +16,7 @@ Start here. This folder is the shared memory of the project: product rules, deci
 | --- | --- | --- |
 | [0001](decisions/0001-supabase-server-only.md) | Supabase is accessed only from the Next.js server | Accepted |
 | [0002](decisions/0002-digital-goods-primary.md) | Digital goods are the primary flow; in-person sales are secondary | Accepted |
-| [0003](decisions/0003-invisible-wallet.md) | Users never see a wallet: social login, sponsored fees, one-button confirmation | Accepted (provider pending) |
+| [0003](decisions/0003-invisible-wallet.md) | Users never see a wallet: Privy embedded wallet, sponsored fees, one-button confirmation | Accepted |
 
 ## How to keep this folder useful
 
