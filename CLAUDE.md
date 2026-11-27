@@ -25,6 +25,27 @@ Resuelve: compradores que no llegan, vendedores que no van en serio, transferenc
 - Demo publicada (Vercel) y video de menos de 3 minutos.
 - En la evaluación revisan el código: el equipo debe entender y poder explicar todo. Cuando generes código, explica las partes no obvias.
 
+### Entrega: lo que suma o elimina
+
+Fuente: [Método Hackathon ChileDAO](https://github.com/GonzaloCamps/metodo-hackathon-chiledao), paso 5.
+
+- **Repo público o el proyecto queda eliminado.** Antes de pasarlo a público, revisar que no haya llaves ni keypairs.
+- **Track Pollar: video de máximo 2 minutos** (no 3). Si se postula a Pollar, el video se hace de 2 minutos.
+- **Llamar `init_config` nosotros apenas desplegar**, antes de publicar la dirección del programa: quien la llame primero queda como `admin`.
+- **El README lo lee una IA del jurado** que revisa a fondo la integración técnica: tiene que ser completo (problema, para quién, flujo, instalación, cómo probar, direcciones del programa) y llevar un diagrama del flujo como imagen (p. ej. Excalidraw).
+- **Una app que se usa, no una landing**: entregar solo una landing es eliminatorio. La demo en Vercel tiene que permitir hacer el flujo principal.
+- **Formulario** (pestaña Project del panel de Dev3pack, editable hasta el cierre): nombre (≤ 50 caracteres), frase corta (≤ 120), descripción (≤ 300 palabras), capturas, logo y banner, links y video. Hub: «Dev3pack Build Station (Santiago)».
+- **Por cada track de partner** (p. ej. Pollar), explicar cómo se integró e indicar el archivo donde está la integración.
+- Antes de enviar, abrir cada link en una ventana privada para comprobar que es público.
+- Al enviar, publicar el proyecto etiquetando a @dev3pack, @solana y @TryNoahAI.
+
+### Preparación y fechas (hora de Chile)
+
+- Pedir SOL de prueba con tiempo en [faucet.solana.com](https://faucet.solana.com), entrando con GitHub (sube el límite): durante la hackathon se satura.
+- Phantom en modo de prueba (Developer Settings → Testnet Mode → Solana Devnet), en una cuenta aparte de la personal.
+- Sábado 28, 10:00–12:00: sesión online de feedback de proyectos.
+- Domingo 29, 04:00: cierre de entregas.
+
 ## Estructura del repo
 
 ```
