@@ -12,6 +12,6 @@ Read AGENTS.md and README.md. Verify a Devnet signature from the web flow on a p
 2. Implement seller creation and sharing, buyer funding and meeting proposal, seller acceptance, buyer release, and an eligible timeout refund. Link and QR should encode the same `/deals/[dealId]` URL.
 3. Keep product details and exact venue off-chain. Derive funding and settlement status from the Solana program. Display pending, confirmed, and failed states distinctly. Never treat a screenshot or a wallet callback alone as confirmation.
 4. Test two wallets, the two phone platforms, and a second deal that refunds after expiry. Keep a visible Devnet indicator and use test funds. Only offer actions permitted for the connected wallet and current order state.
-5. Deploy the functional web flow to a public URL. Document setup, program addresses and the demo steps in the README. Preserve the Android Expo scaffold if the team pursues Solana Mobile separately.
+5. Deploy the functional web flow to a public URL. Document setup, program addresses and the demo steps in the README.
 
 Keep NFC, shipping, disputes, Pollar and AI integrations outside this first slice. Follow the Conventional Commits and SemVer policy in AGENTS.md.

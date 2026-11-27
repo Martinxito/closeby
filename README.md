@@ -7,7 +7,6 @@ Reserve funds before meeting, inspect the item in person, and release the paymen
 | `apps/web` | Primary mobile-first Next.js application |
 | `apps/api` | Deal metadata API (planned) |
 | `solana` | On-chain escrow program (planned) |
-| `apps/mobile` | Expo scaffold for a possible Solana Mobile entry |
 
 ## Web development
 

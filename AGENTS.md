@@ -5,7 +5,6 @@ Closeby lets buyers reserve funds before an in-person sale and release them afte
 ## Repository layout
 
 - `apps/web` is the primary Next.js app for mobile browsers on iOS and Android.
-- `apps/mobile` contains the retained Expo scaffold for a possible Solana Mobile entry.
 - `apps/api` is reserved for the deal metadata API.
 - `solana` is reserved for the escrow program and its tests.
 
@@ -26,7 +25,7 @@ Closeby lets buyers reserve funds before an in-person sale and release them afte
 
 ## Commits and releases
 
-- Write commit messages in English using Conventional Commits: `type(scope): description`. The scope is optional. Use `web`, `mobile`, `api`, or `escrow` when the change belongs to one component.
+- Write commit messages in English using Conventional Commits: `type(scope): description`. The scope is optional. Use `web`, `api`, or `escrow` when the change belongs to one component.
 - Use `feat` for features, `fix` for bug fixes, and `docs`, `test`, `refactor`, `build`, `ci`, or `chore` for other changes. Write the description in the imperative, for example `feat(web): open deals from QR codes`.
 - Mark breaking changes with `!` or a `BREAKING CHANGE:` footer and describe the migration.
 - Version repository-wide releases with SemVer and tag them as `vMAJOR.MINOR.PATCH`. For stable releases, use a patch for compatible fixes, a minor for compatible features, and a major for breaking changes. During initial development, use `0.y.z` and document breaking changes in the release notes.
