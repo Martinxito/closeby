@@ -25,7 +25,18 @@ export function TestBalance() {
     if (wallet.address) void refresh();
   }, [wallet.address, refresh]);
 
-  if (!wallet.ready || !wallet.address) return null;
+  if (!wallet.ready) return null;
+
+  if (!wallet.address) {
+    return (
+      <section className="card stack">
+        <small className="muted">Entra para ver tu saldo y comprar o vender.</small>
+        <button type="button" className="button secondary" onClick={() => wallet.login()}>
+          Entrar
+        </button>
+      </section>
+    );
+  }
 
   async function topUp() {
     setLoading(true);
@@ -42,7 +53,7 @@ export function TestBalance() {
   return (
     <section className="card stack">
       <div>
-        <small className="muted">Tu saldo</small>
+        <small className="muted">{wallet.label ? `Hola, ${wallet.label}. Tu saldo` : 'Tu saldo'}</small>
         <div>
           <strong>{balance ? formatClp(balance.balanceClp) : '…'}</strong>
         </div>
@@ -56,6 +67,9 @@ export function TestBalance() {
         {loading ? 'Cargando…' : 'Cargar saldo de prueba'}
       </button>
       <small className="muted">Plata de prueba para la demo. No es plata real.</small>
+      <button type="button" className="link-button" onClick={() => wallet.logout()}>
+        Salir
+      </button>
     </section>
   );
 }

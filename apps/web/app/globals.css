@@ -89,6 +89,17 @@ a {
   cursor: not-allowed;
 }
 
+.link-button {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: #166047;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .error {
   margin: 0;
   padding: 0.75rem;
