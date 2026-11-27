@@ -1,0 +1,22 @@
+# Secretos: nunca commitear
+.env*
+!.env.example
+*.keypair.json
+id.json
+**/wallet*.json
+.anchor/
+target/
+test-ledger/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Documentos locales
+*.pdf
