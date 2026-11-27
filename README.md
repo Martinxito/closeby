@@ -43,8 +43,23 @@ The browser never talks to the database. Only the Next.js server reads and write
 | `ESCROW_MODE`, `NEXT_PUBLIC_ESCROW_MODE` | `mock` until the Solana program is on Devnet, then `chain`. Same value in both. |
 | `WALLET_MODE` | `mock` (test users) until Privy is wired in, then `privy`. |
 | `MOCK_AUTH_SECRET` | Optional. Signs mock session tokens; defaults to a secret derived from `SUPABASE_SECRET_KEY`. |
+| `SOLANA_RPC_URL`, `FEE_PAYER_SECRET_KEY`, `USDC_MINT` | Devnet RPC, our fee payer and the test USDC mint. Created by the setup script below. Server-only. |
 
 Set the same variables in the Vercel project (Production and Preview).
+
+## Fees paid by us and test balance (Devnet)
+
+Users never hold SOL: our server's fee payer pays fees and rent (`apps/web/lib/solana/relay.ts`). It only signs transactions the server built itself: each prepared transaction comes with a ticket (HMAC of the message), and the signed transaction is rejected if anything changed or the logged-in user did not sign it (`lib/solana/ticket.ts`).
+
+Test USDC is our own SPL token (6 decimals). "Cargar saldo de prueba" (`POST /api/balance`) mints 500 test USDC to the user while their balance is under 100.
+
+One-time setup (safe to re-run; writes to `apps/web/.env.local`, never prints the secret):
+
+```sh
+pnpm --filter @closeby/web setup:devnet
+```
+
+If the airdrop is refused, send Devnet SOL to the printed fee payer address at https://faucet.solana.com and run it again. Then copy the three Solana variables to Vercel.
 
 ## Escrow mock
 

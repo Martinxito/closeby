@@ -31,6 +31,8 @@ The program needs users to sign **our own Anchor instructions** (`fund`, `open_d
 
 **Decision:** use **Privy** embedded Solana wallets. Verify in the block 1 spike: Google/email login, signing a transaction with our server as fee payer and no UI prompt, on iPhone and Android. Pollar's partner track is dropped unless they ship custom-instruction support.
 
+**Implemented (27 Nov):** the fee payer relay (`apps/web/lib/solana/relay.ts`) only co-signs transactions our server built, verified with an HMAC ticket and the user's signature (`lib/solana/ticket.ts`). Test balance: our own 6-decimal SPL token, minted by the fee payer (`lib/solana/balance.ts`). Signing spike for Privy: `POST /api/solana/spike` then `POST /api/solana/submit`.
+
 To keep the choice cheap, the web wraps the provider behind one module (`apps/web/lib/wallet/`) exposing `login()`, `logout()`, `useUser()` and `signTransaction(tx)`. Screens never import the provider directly.
 
 ## Sources

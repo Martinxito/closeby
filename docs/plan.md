@@ -23,7 +23,7 @@ Updated: Friday 27 Nov, 20:00 (Chile). Submission: **Saturday 28, 23:00**. Featu
 | **3. Sat 09:00–13:00** | ✅ (done Fri night) Server identity from session tokens; deal saved only if the order matches; buyer-only 5-minute download links; seller status page | Unlock, download, "Recibí el archivo" button, cancel, deadline actions, "Ver comprobante" | `confirm_handover`, deadlines, tests; deploy to Devnet, `init_config` |
 | Sat 10:00–12:00 | Feedback session: show the full mocked flow | | |
 | Sat 13:00 | **Sync:** IDL + program ID + mint. Decide in-person flow and AI agent (only if block 4 looks safe) | | |
-| **4. Sat 13:00–18:00** | Swap mock for the real program; fee payer on the server; test balance button | End-to-end on Devnet with two accounts and two phones | Fix what integration finds |
+| **4. Sat 13:00–18:00** | ✅ (done Fri night) Fee payer relay and test balance button. Pending: swap mock for the real program | End-to-end on Devnet with two accounts and two phones | Fix what integration finds |
 | **5. Sat 18:00–20:00** | Error and pending states, no crypto words, CLP everywhere | Mobile polish, empty states | README program section, addresses |
 | **6. Sat 20:00–23:00** | Freeze. README (problem, flow diagram, setup, program addresses, partner integration file), video (under 3 min), Dev3pack form, open every link in a private window, submit | | |
 
