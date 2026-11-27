@@ -18,7 +18,7 @@ Updated: Friday 27 Nov, 20:00 (Chile). Submission: **Saturday 28, 23:00**. Featu
 
 | Block | Martín (seller and server) | Diego (buyer and wallet) | Program (Alex, Aaron) |
 | --- | --- | --- | --- |
-| **1. Fri 20:00–22:30** | Shared base: `lib/escrow` types and mock, `deals` migration for digital fields, private `files` bucket | Privy spike behind `lib/wallet`: Google login + signing with our fee payer, no pop-up, on iPhone and Android | Agree on [escrow-changes.md](escrow-changes.md) |
+| **1. Fri 20:00–22:30** | ✅ Shared base: `lib/escrow` (types, rules with tests, mock backed by `mock_orders`), `lib/wallet` interface + mock wallet, migration `0003` (digital fields, private `files`, public `previews`) | Privy spike behind `lib/wallet`: Google login + signing with our fee payer, no pop-up, on iPhone and Android | Agree on [escrow-changes.md](escrow-changes.md) |
 | **2. Fri 22:30–01:00** | `/vender`: upload file, hash, preview, publish (mock), share link and QR | `/deals/[id]`: preview, buy (mock), status timeline per role | `create_order`, `fund`, `open_delivery` |
 | **3. Sat 09:00–13:00** | Server checks: save deal only if order is on-chain; signed download URLs | Unlock, download, "Recibí el archivo" button, cancel, deadline actions, "Ver comprobante" | `confirm_handover`, deadlines, tests; deploy to Devnet, `init_config` |
 | Sat 10:00–12:00 | Feedback session: show the full mocked flow | | |
