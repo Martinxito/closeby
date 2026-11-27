@@ -4,21 +4,22 @@ Reserve funds before meeting, inspect the item in person, and release the paymen
 
 | Path | Role |
 | --- | --- |
-| `apps/mobile` | Expo app based on the official Solana Mobile template |
+| `apps/web` | Primary mobile-first Next.js application |
 | `apps/api` | Deal metadata API (planned) |
 | `solana` | On-chain escrow program (planned) |
+| `apps/mobile` | Expo scaffold for a possible Solana Mobile entry |
 
-## Android development
+## Web development
 
-From the repository root, run `pnpm install`. From `apps/mobile`, follow the mobile README to install a development build and start Metro. Use a physical Android device to test wallet signing and NFC.
-
-To use EAS Build, run these commands from `apps/mobile`:
+Use Node.js 24 and the pnpm version declared in the root package.json.
 
 ```sh
-npx eas-cli@latest login
-npx eas-cli@latest init
-npx eas-cli@latest build --platform android --profile development
-pnpm exec expo start --dev-client
+pnpm install --frozen-lockfile
+pnpm --filter @closeby/web dev
+pnpm --filter @closeby/web typecheck
+pnpm --filter @closeby/web build
 ```
 
-Install the APK from the build link on your Android phone and scan the Metro QR code. The mobile workspace starts from the official `expo-kit-wallet` template (Apache-2.0).
+Open http://localhost:3000. The initial `/deals/[dealId]` route is a public URL scaffold. It does not read a deal or submit transactions yet.
+
+For a hosted demo, import this repository into Vercel and set the Next.js project's root directory to `apps/web`. Use Solana Devnet and test tokens for the hackathon. See [the web handoff](CLOSEBY_CONTEXT.md) for the next implementation slice.

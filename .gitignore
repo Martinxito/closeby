@@ -4,3 +4,7 @@ node_modules/
 !.env.example
 *.apk
 *.aab
+
+.next/
+next-env.d.ts
+*.tsbuildinfo
