@@ -1,0 +1,36 @@
+# Plan until submission
+
+Updated: Friday 27 Nov, 20:00 (Chile). Submission: **Saturday 28, 23:00**. Feature freeze: **Saturday 20:00**.
+
+## Done
+
+- Next.js app in `apps/web`, deployed on Vercel.
+- Supabase `deals` table, server-only access ([decisions/0001](decisions/0001-supabase-server-only.md)). `/deals/[dealId]` reads a deal.
+- CI on every pull request (typecheck and build).
+- Product decisions: digital goods first ([0002](decisions/0002-digital-goods-primary.md)), invisible wallet ([0003](decisions/0003-invisible-wallet.md)).
+
+## Biggest risks
+
+1. **The program is not on Devnet yet** (`solana/` is empty). The web builds against a mock with the same interface (`apps/web/lib/escrow/`), swapped for the real client when the IDL arrives.
+2. **Wallet provider** (Pollar vs Privy) is undecided. Hidden behind `apps/web/lib/wallet/` so the switch is cheap.
+
+## Blocks
+
+| Block | Martín (seller and server) | Diego (buyer and wallet) | Program (Alex, Aaron) |
+| --- | --- | --- | --- |
+| **1. Fri 20:00–22:30** | Shared base: `lib/escrow` types and mock, `deals` migration for digital fields, private `files` bucket | Wallet spike behind `lib/wallet`: Google login + signing on iPhone and Android. Ask Pollar team (0003) | Agree on [escrow-changes.md](escrow-changes.md) |
+| **2. Fri 22:30–01:00** | `/vender`: upload file, hash, preview, publish (mock), share link and QR | `/deals/[id]`: preview, buy (mock), status timeline per role | `create_order`, `fund`, `open_delivery` |
+| **3. Sat 09:00–13:00** | Server checks: save deal only if order is on-chain; signed download URLs | Unlock, download, "Recibí el archivo" button, cancel, deadline actions, "Ver comprobante" | `confirm_handover`, deadlines, tests; deploy to Devnet, `init_config` |
+| Sat 10:00–12:00 | Feedback session: show the full mocked flow | | |
+| Sat 13:00 | **Sync:** IDL + program ID + mint. Decide in-person flow and AI agent (only if block 4 looks safe) | | |
+| **4. Sat 13:00–18:00** | Swap mock for the real program; fee payer on the server; test balance button | End-to-end on Devnet with two accounts and two phones | Fix what integration finds |
+| **5. Sat 18:00–20:00** | Error and pending states, no crypto words, CLP everywhere | Mobile polish, empty states | README program section, addresses |
+| **6. Sat 20:00–23:00** | Freeze. README (problem, flow diagram, setup, program addresses, partner integration file), video (2 min if Pollar track), Dev3pack form, open every link in a private window, submit | | |
+
+## Checkpoints
+
+- **Fri 22:30:** login + signature works on a real phone; escrow-changes agreed.
+- **Sat 10:00:** full digital flow works on mocks, on Vercel.
+- **Sat 13:00:** program on Devnet with IDL.
+- **Sat 18:00:** full digital flow on Devnet, two accounts.
+- **Sat 20:00:** freeze.

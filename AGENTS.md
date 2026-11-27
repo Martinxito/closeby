@@ -1,6 +1,16 @@
 # Closeby
 
-Closeby lets buyers reserve funds before an in-person sale and release them after inspecting the item.
+Closeby lets buyers pay into escrow and release the money with one button once they receive what they bought. Digital goods (audio, video, images, reports, files) are the primary flow; in-person sales are secondary.
+
+## Read first
+
+Before changing anything, read [docs/README.md](docs/README.md). The `docs/` folder holds the agreed product rules, flows, program contract, plan and decisions, and takes precedence over `CLOSEBY_CONTEXT.md`. When you change a rule, a flow or the program contract, update `docs/` in the same pull request, and record new decisions in `docs/decisions/`.
+
+Key rules:
+
+- Users never notice the blockchain: social login, embedded wallet, fees paid by our server, no crypto words on screen, prices in CLP ([docs/product.md](docs/product.md)).
+- Confirmation is one button. Unlocking a digital file is the point of no return ([docs/flows/digital-sale.md](docs/flows/digital-sale.md)).
+- Supabase is accessed only from server code with the secret key ([docs/decisions/0001-supabase-server-only.md](docs/decisions/0001-supabase-server-only.md)).
 
 ## Repository layout
 
@@ -12,7 +22,7 @@ Closeby lets buyers reserve funds before an in-person sale and release them afte
 ## Payment flow
 
 - Treat Solana as the source of truth for escrow state. Verify the transaction before showing a confirmed payment.
-- Require the buyer to explicitly approve release with their wallet.
+- Require the buyer to explicitly approve release by pressing the confirmation button; their embedded wallet signs in the background.
 - Share the same public `/deals/[dealId]` URL through links and QR codes. Verify the wallet-supplied signature and the on-chain order before displaying settlement.
 - Keep private keys out of the API and personal data off-chain.
 

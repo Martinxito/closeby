@@ -1,5 +1,7 @@
 # Closeby web handoff
 
+> **Partly superseded (27 Nov):** digital goods are now the primary flow and users never see a wallet (no Phantom by default). See [docs/README.md](docs/README.md), which takes precedence over this file.
+
 Closeby is a mobile-first web app for in-person secondhand sales. The seller shares a link, the buyer funds the deal and proposes a meeting, the seller accepts, and the buyer releases payment after inspecting the item. The same URL opens from chat or from a QR code. Target iPhone and Android browsers, with everyday Chilean Spanish in the UI and English in code, documentation, and commits.
 
 ## Start with a signing spike
