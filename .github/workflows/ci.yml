@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to the same branch cancels the previous run instead of queueing.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only token: CI only checks code, it never writes to the repository.
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web (typecheck and build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      # Installs the pnpm version pinned in the root package.json ("packageManager").
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Install only the web app and its dependencies: the Expo app is much heavier
+      # and is not part of this check.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter "@closeby/web..."
+
+      - name: Typecheck
+        run: pnpm --filter @closeby/web typecheck
+
+      # The build needs no secrets: /deals/[dealId] is rendered on demand, so Supabase
+      # is never called at build time.
+      - name: Build
+        run: pnpm --filter @closeby/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
