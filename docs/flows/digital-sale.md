@@ -38,6 +38,8 @@ Show pending, confirmed and failed states distinctly. Never show "paid" from a w
 
 ## Server checks (Next.js, never trust the browser)
 
+- **Who is calling** comes from a session token verified on the server (`apps/web/lib/auth/server.ts`): Privy's access token, or a server-signed token in mock mode. Never from an address in the request body: addresses are public on-chain.
+
 - Save a deal only if the on-chain order exists, `seller` matches and `content_hash` equals the SHA-256 of the stored file.
-- Hand out a download URL only if the on-chain order is `Delivered` or `Released` and the logged-in user's wallet is the order's `buyer`. URLs expire in minutes.
+- Hand out a download URL (`POST /api/deals/[dealId]/download`) only if the on-chain order is `Delivered` or `Released` and the logged-in user's wallet is the order's `buyer`. URLs expire in minutes.
 - The file is never in a public bucket and never in the client bundle.

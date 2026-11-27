@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyAction, availableActions } from './rules';
+import { applyAction, availableActions, canDownload } from './rules';
 import { EscrowError, type EscrowAction, type EscrowConfig, type Order } from './types';
 
 const config: EscrowConfig = { digitalClaimSecs: 600, digitalReviewSecs: 300 };
@@ -147,5 +147,24 @@ describe('availableActions', () => {
     expect(availableActions(delivered(), BUYER, T0 + 60)).toEqual(['confirm_handover']);
     expect(availableActions(delivered(), SELLER, T0 + 60)).toEqual([]);
     expect(availableActions(delivered(), SELLER, T0 + 361)).toEqual(['release_after_deadline']);
+  });
+});
+
+describe('canDownload', () => {
+  it('only the buyer, only after unlocking', () => {
+    expect(canDownload(create(), BUYER)).toBe(false);
+    expect(canDownload(funded(), BUYER)).toBe(false); // paid but not unlocked yet
+    expect(canDownload(delivered(), BUYER)).toBe(true);
+    expect(canDownload(delivered(), SELLER)).toBe(false);
+    expect(canDownload(delivered(), STRANGER)).toBe(false);
+    expect(canDownload(delivered(), null)).toBe(false);
+    expect(canDownload(null, BUYER)).toBe(false);
+  });
+
+  it('still allowed after paying the seller, never after a refund', () => {
+    const released = run(delivered(), { type: 'confirm_handover', dealId: '1', signer: BUYER }).order;
+    expect(canDownload(released, BUYER)).toBe(true);
+    const refunded = run(funded(), { type: 'buyer_cancel', dealId: '1', signer: BUYER }).order;
+    expect(canDownload(refunded, BUYER)).toBe(false);
   });
 });

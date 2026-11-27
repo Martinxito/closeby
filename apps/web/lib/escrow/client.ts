@@ -26,9 +26,10 @@ export async function sendEscrowAction(
     throw new Error('Chain mode is not implemented yet.');
   }
 
+  const token = await wallet.getAccessToken();
   const response = await fetch('/api/escrow/mock', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
     body: JSON.stringify(full),
   });
   const body = (await response.json()) as ActionResult | { error: { code: string; message: string } };

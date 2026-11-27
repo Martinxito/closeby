@@ -75,7 +75,7 @@ export function SellForm() {
       setStep('publishing');
       const published = await publishSale({
         dealId: prepared.dealId,
-        seller: wallet.address,
+        accessToken: await wallet.getAccessToken(),
         title: String(form.get('title') ?? ''),
         description: String(form.get('description') ?? ''),
         priceClp,

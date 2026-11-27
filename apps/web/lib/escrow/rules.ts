@@ -140,6 +140,16 @@ export function availableActions(order: Order | null, viewer: string | null, now
   return actions;
 }
 
+/**
+ * Whether `viewer` may download the file of a digital order: only its buyer, and only
+ * after unlocking it on-chain (Delivered) or after paying the seller (Released).
+ * A refunded buyer never unlocked the file, so Refunded is not allowed.
+ */
+export function canDownload(order: Order | null, viewer: string | null): boolean {
+  if (!order || !viewer || order.kind !== 'digital') return false;
+  return viewer === order.buyer && (order.status === 'Delivered' || order.status === 'Released');
+}
+
 function requireStatus(order: Order, expected: Order['status']): void {
   if (order.status !== expected) {
     throw new EscrowError('InvalidStatus', `Expected status ${expected}, found ${order.status}.`);

@@ -41,6 +41,8 @@ The browser never talks to the database. Only the Next.js server reads and write
 | `SUPABASE_URL` | Project URL (`https://<project-id>.supabase.co`) |
 | `SUPABASE_SECRET_KEY` | Secret key (`sb_secret_...`). Server-only: never prefix it with `NEXT_PUBLIC_`. |
 | `ESCROW_MODE`, `NEXT_PUBLIC_ESCROW_MODE` | `mock` until the Solana program is on Devnet, then `chain`. Same value in both. |
+| `WALLET_MODE` | `mock` (test users) until Privy is wired in, then `privy`. |
+| `MOCK_AUTH_SECRET` | Optional. Signs mock session tokens; defaults to a secret derived from `SUPABASE_SECRET_KEY`. |
 
 Set the same variables in the Vercel project (Production and Preview).
 
