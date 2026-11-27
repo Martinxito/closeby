@@ -32,9 +32,3 @@ export async function getDeal(dealId: string): Promise<Deal | null> {
   if (error) throw new Error(`Could not load deal ${dealId}: ${error.message}`);
   return data;
 }
-
-const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
-
-export function formatClp(amount: number): string {
-  return clp.format(amount);
-}
