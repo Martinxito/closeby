@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { TestBalance } from '@/components/test-balance';
 
 export default function HomePage() {
   return (
@@ -9,6 +10,7 @@ export default function HomePage() {
         Vender un archivo
       </Link>
       <p className="muted">Si te compartieron una venta, abre el link que recibiste.</p>
+      <TestBalance />
     </main>
   );
 }
