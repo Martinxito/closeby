@@ -7,7 +7,7 @@ import { getDeal, isDealId } from '@/lib/deals';
 import { getOrder } from '@/lib/escrow/server';
 import type { Order } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
-import { AutoRefresh } from './auto-refresh';
+import { AutoRefresh } from '@/components/auto-refresh';
 import { ShareActions } from './share-actions';
 import SiteHeader from '../../site-header';
 

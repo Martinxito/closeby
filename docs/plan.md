@@ -1,6 +1,6 @@
 # Plan until submission
 
-Updated: Friday 27 Nov, 20:00 (Chile). Submission: **Saturday 28, 23:00**. Feature freeze: **Saturday 20:00**.
+Updated: Friday 27 Nov, 21:00 (Chile). The full digital flow runs on the mock; Diego focuses on the Privy spike. Submission: **Saturday 28, 23:00**. Feature freeze: **Saturday 20:00**.
 
 ## Done
 
@@ -19,8 +19,8 @@ Updated: Friday 27 Nov, 20:00 (Chile). Submission: **Saturday 28, 23:00**. Featu
 | Block | Martín (seller and server) | Diego (buyer and wallet) | Program (Alex, Aaron) |
 | --- | --- | --- | --- |
 | **1. Fri 20:00–22:30** | ✅ Shared base: `lib/escrow` (types, rules with tests, mock backed by `mock_orders`), `lib/wallet` interface + mock wallet, migration `0003` (digital fields, private `files`, public `previews`) | Privy spike behind `lib/wallet`: Google login + signing with our fee payer, no pop-up, on iPhone and Android | Agree on [escrow-changes.md](escrow-changes.md) |
-| **2. Fri 22:30–01:00** | ✅ `/vender`: upload file, hash, preview, publish (mock), share link and QR | `/deals/[id]`: preview, buy (mock), status timeline per role | `create_order`, `fund`, `open_delivery` |
-| **3. Sat 09:00–13:00** | ✅ (done Fri night) Server identity from session tokens; deal saved only if the order matches; buyer-only 5-minute download links; seller status page | Unlock, download, "Recibí el archivo" button, cancel, deadline actions, "Ver comprobante" | `confirm_handover`, deadlines, tests; deploy to Devnet, `init_config` |
+| **2. Fri 22:30–01:00** | ✅ `/vender`: upload file, hash, preview, publish (mock), share link and QR | ✅ (Martín) `/deals/[id]`: preview, buy (mock), status timeline per role | `create_order`, `fund`, `open_delivery` |
+| **3. Sat 09:00–13:00** | ✅ (done Fri night) Server identity from session tokens; deal saved only if the order matches; buyer-only 5-minute download links; seller status page | ✅ (Martín) Unlock with warning, download, "Recibí el archivo" button, cancel, deadline actions, receipt | `confirm_handover`, deadlines, tests; deploy to Devnet, `init_config` |
 | Sat 10:00–12:00 | Feedback session: show the full mocked flow | | |
 | Sat 13:00 | **Sync:** IDL + program ID + mint. Decide in-person flow and AI agent (only if block 4 looks safe) | | |
 | **4. Sat 13:00–18:00** | ✅ (done Fri night) Fee payer relay and test balance button. Pending: swap mock for the real program | End-to-end on Devnet with two accounts and two phones | Fix what integration finds |
