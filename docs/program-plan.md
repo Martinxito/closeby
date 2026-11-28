@@ -45,6 +45,7 @@ pnpm --filter @closeby/solana test     # 27 tests on solana-test-validator
 
 Two things that bite:
 
+- **Upgrades that grow the program** need `solana program extend <PROGRAM_ID> 10240` first (10240 bytes is the minimum).
 - **Always build with `--arch v0`.** Anchor 1.2.2 defaults to SBPF v3, which the 3.1.10 validator rejects ("Program is not deployed"). v0 runs on every cluster.
 - **Tests use `--validator legacy`** (solana-test-validator). Surfpool, Anchor's new default, failed with "Blockhash not found" against web3.js v1.
 
@@ -102,6 +103,7 @@ Fill in after step 6 and 7:
 | Test USDC mint | `9REWY6ZAJbt6UaH1nLetb6i7tApvLWzr9m3TSo5ZCnkz` (6 decimals; authority = web fee payer `DhuJTzRRuLLHdHt5BsreqvZR9i8qiskVktprDsUF64BA`) |
 | `digital_claim_secs` / `digital_review_secs` | 600 / 300 |
 | Deploy transaction | `TWcRsxwuWaLiXqcMMuSej1ZpejzpHSndLL8CddNfmWhJPTgewwpDKg9qgqFGv3LYBVvCP4rEQc2mDiBvCi1qtVi` |
+| Upgrade (modular version, Sat 02:30) | `rbHYoJmM6a5XRxMXbuGdLfNkvpLAKhmYcLs8rp9uwfJm9dNgt3K8u2zzsY6YspS8dqzn2UrDHAPHdvJkpUN1UHt` (slot 527210822; on-chain binary SHA-256 matches `anchor build --arch v0`) |
 | Upgrade authority | `J2m4KAUHetgikUpGYgGVtDw7tuhKVXzgcouTycjJavix` |
 | ProgramData | `9xesLoZxwRJJfw8LnDc5Yd46acrnPZwad555prvnTjKB` |
 | `init_config` transaction | `5KvPjxCzrmQTr51mpcE472MS2pdnxDKriQsHQsMi475q81HYHoF5NnEykR95X2Yw4kuokcKrA6Pc4TXJ8jF1sPiW` |
