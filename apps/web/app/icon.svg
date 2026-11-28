@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-6.6 -5.1 42 42" role="img" aria-label="Closeby">
+  <defs>
+    <linearGradient id="tile" gradientUnits="userSpaceOnUse" x1="2.85" y1="-2.03" x2="25.95" y2="30.83">
+      <stop offset="5%" stop-color="#fafcff" />
+      <stop offset="52%" stop-color="#d1d9ff" />
+      <stop offset="100%" stop-color="#a2aaec" />
+    </linearGradient>
+    <filter id="shadow" x="-14" y="-11" width="57" height="57" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dy="3" stdDeviation="3.5" flood-color="#5754ab" flood-opacity="0.26" />
+    </filter>
+    <filter id="highlight" color-interpolation-filters="sRGB">
+      <feOffset in="SourceAlpha" dy="1" />
+      <feGaussianBlur stdDeviation="1" />
+      <feComposite in="SourceAlpha" operator="out" result="rim" />
+      <feFlood flood-color="#fff" />
+      <feComposite in2="rim" operator="in" result="white" />
+      <feComposite in="white" in2="SourceGraphic" operator="over" />
+    </filter>
+  </defs>
+  <g>
+    <g filter="url(#shadow)">
+      <rect x="0.5" y="0.5" width="27.8" height="27.8" rx="9.9" fill="url(#tile)" stroke="#fff" filter="url(#highlight)" />
+    </g>
+    <g fill="none" stroke="#494194" stroke-width="1.2">
+      <rect x="6.4" y="14.08" width="12.08" height="7.6" rx="3.8" transform="rotate(-44 12.44 17.88)" />
+      <rect x="10.48" y="8.8" width="12.08" height="7.6" rx="3.8" transform="rotate(-44 16.52 12.6)" />
+    </g>
+  </g>
+</svg>

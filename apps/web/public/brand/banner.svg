@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500" role="img" aria-labelledby="banner-title banner-description">
+  <title id="banner-title">Closeby — Paga primero. Libera al recibir.</title>
+  <desc id="banner-description">Pagos protegidos en Solana · sin wallet, sin SOL</desc>
+  <defs>
+    <linearGradient id="banner-base" gradientUnits="userSpaceOnUse" x1="454.25" y1="-262.26" x2="1045.75" y2="762.26">
+      <stop stop-color="#f9faff" />
+      <stop offset="59%" stop-color="#edf0fa" />
+      <stop offset="100%" stop-color="#f8faff" />
+    </linearGradient>
+    <radialGradient id="banner-lavender" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(1290 80) scale(1824.34 593.97)">
+      <stop stop-color="#e0dcf8" />
+      <stop offset="43%" stop-color="#e0dcf8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="banner-blue" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(225 185) scale(1803.12 445.48)">
+      <stop stop-color="#e4f6fc" />
+      <stop offset="46%" stop-color="#e4f6fc" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="banner-glass" x1="0%" y1="0%" x2="83%" y2="100%">
+      <stop offset="5%" stop-color="#fafcff" />
+      <stop offset="52%" stop-color="#d1d9ff" />
+      <stop offset="100%" stop-color="#a2aaec" />
+    </linearGradient>
+    <filter id="banner-glass-shadow" x="-25%" y="-60%" width="150%" height="220%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="9" stdDeviation="10" flood-color="#5754ab" flood-opacity="0.17" />
+    </filter>
+    <g id="banner-link">
+      <rect x="-143" y="-47" width="286" height="94" rx="47" stroke="url(#banner-glass)" stroke-width="34" />
+      <rect x="-159.25" y="-63.25" width="318.5" height="126.5" rx="63.25" stroke="#fafcff" stroke-width="1.5" />
+      <rect x="-125.25" y="-29.25" width="250.5" height="58.5" rx="29.25" stroke="#fafcff" stroke-opacity="0.8" stroke-width="1.5" />
+    </g>
+  </defs>
+  <g aria-hidden="true">
+    <rect width="1500" height="500" fill="url(#banner-base)" />
+    <rect width="1500" height="500" fill="url(#banner-blue)" />
+    <rect width="1500" height="500" fill="url(#banner-lavender)" />
+    <g fill="none" opacity="0.62">
+      <use href="#banner-link" transform="translate(1078 280) rotate(-38)" filter="url(#banner-glass-shadow)" />
+      <use href="#banner-link" transform="translate(1220 218) rotate(-38)" filter="url(#banner-glass-shadow)" />
+    </g>
+  </g>
+
+  <!-- Inline copy of logo.svg so the banner renders and exports as a standalone file. -->
+  <svg x="82" y="80" width="305" height="94.19" viewBox="-6.6 -5.1 136 42" aria-hidden="true">
+    <defs>
+      <linearGradient id="tile" gradientUnits="userSpaceOnUse" x1="2.85" y1="-2.03" x2="25.95" y2="30.83">
+        <stop offset="5%" stop-color="#fafcff" />
+        <stop offset="52%" stop-color="#d1d9ff" />
+        <stop offset="100%" stop-color="#a2aaec" />
+      </linearGradient>
+      <filter id="shadow" x="-14" y="-11" width="57" height="57" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        <feDropShadow dy="3" stdDeviation="3.5" flood-color="#5754ab" flood-opacity="0.26" />
+      </filter>
+      <filter id="highlight" color-interpolation-filters="sRGB">
+        <feOffset in="SourceAlpha" dy="1" />
+        <feGaussianBlur stdDeviation="1" />
+        <feComposite in="SourceAlpha" operator="out" result="rim" />
+        <feFlood flood-color="#fff" />
+        <feComposite in2="rim" operator="in" result="white" />
+        <feComposite in="white" in2="SourceGraphic" operator="over" />
+      </filter>
+    </defs>
+    <g aria-hidden="true">
+      <g filter="url(#shadow)">
+        <rect x="0.5" y="0.5" width="27.8" height="27.8" rx="9.9" fill="url(#tile)" stroke="#fff" filter="url(#highlight)" />
+      </g>
+      <g fill="none" stroke="#494194" stroke-width="1.2">
+        <rect x="6.4" y="14.08" width="12.08" height="7.6" rx="3.8" transform="rotate(-44 12.44 17.88)" />
+        <rect x="10.48" y="8.8" width="12.08" height="7.6" rx="3.8" transform="rotate(-44 16.52 12.6)" />
+      </g>
+    </g>
+    <text x="36.8" y="14.4" dominant-baseline="central" font-family="'Avenir Next', Avenir, 'Segoe UI', system-ui, sans-serif" font-size="26.4" font-weight="700" letter-spacing="-0.055em" fill="#1c203b">closeby<tspan dx="0.035em" fill="#4d47a7">.</tspan></text>
+  </svg>
+
+  <g aria-hidden="true" font-family="'Avenir Next', Avenir, 'Segoe UI', system-ui, sans-serif">
+    <g fill="#1c203b" font-size="84" font-weight="700" letter-spacing="-0.05em">
+      <text x="96" y="255">Paga primero.</text>
+      <text x="96" y="343">Libera al recibir<tspan fill="#4d47a7">.</tspan></text>
+    </g>
+    <text x="96" y="412" fill="#505875" font-size="34">Pagos protegidos en Solana · sin wallet, sin SOL</text>
+  </g>
+</svg>
