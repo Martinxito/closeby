@@ -76,10 +76,50 @@ Never commit keypairs (`*.json` wallets, `.env*`), and never share Phantom's rec
 | 1 | Pull the branch, run `anchor build` and `anchor test` on his machine | Tests pass for him too |
 | 2 | Read the program end to end and be able to explain every instruction and check (judges inspect the code) | He can explain it without notes |
 | 3 | Add any missing failing test he finds while reading | Tests pass |
-| 4 | Help the web integrate: build the instructions from the IDL for `lib/escrow` chain mode, together with Martín | One real `create_order` + `fund` on Devnet from the web |
+| 4 | Help the web integrate, with Martín, following "Connecting the web" below (the client in `solana/client/` already builds every instruction) | One real `create_order` + `fund` on Devnet from the web |
 | 5 | Fix what integration finds (redeploy to the same program ID if needed) | End-to-end flow works on Devnet |
 | 6 | README program section: program ID, mint, config values, instructions and rules, how to run the tests; flow diagram (Excalidraw screenshot) | Section merged before 20:00 |
 | 7 | Only if the 13:00 sync approves and time allows: physical instructions, following [in-person-proposal.md](in-person-proposal.md) | Decided at 13:00 |
+
+## Connecting the web (chain mode)
+
+The program has no HTTP endpoints: the web **sends transactions** to act and **reads accounts** to know the state. Our own Next.js routes do the building and sending, with the relay that already exists (`apps/web/lib/solana/relay.ts`, proven by `/api/solana/spike` and `/api/solana/submit`).
+
+`solana/client/` has everything the web needs, so nobody writes PDAs or instruction bytes by hand:
+
+| Export | Use |
+| --- | --- |
+| `createEscrowClient({ connection, usdcMint, feePayer })` | One client per server process |
+| `escrow.fetchOrder(seller, dealId)` | Reads the order in the web's `Order` shape (`status: 'Funded'`, amounts as numbers, hash as hex), or `null` |
+| `escrow.build.createOrder` · `fund` · `openDelivery` · `buyerCancel` · `confirmHandover` · `refundAfterDeadline` · `releaseAfterDeadline` | Instructions for one action, ready for `prepareSponsored` (token accounts included) |
+| `escrow.findLastSignature(seller, dealId)` | Signature for "Ver comprobante" |
+| `escrowErrorName(err)` | `'NotBuyer'`, `'InvalidStatus'`… from a failed transaction, the same codes as `EscrowErrorCode` |
+| `orderAddress`, `vaultAddress`, `userTokenAddress`, `dealIdToBN` | Addresses and the u64 deal ID, if needed |
+
+Flow of one action (for example "Comprar"):
+
+```
+browser                        Next.js server                               Devnet
+1. press button  ───────────►  2. POST /api/escrow/prepare
+                                  authenticate (lib/auth/server.ts)
+                                  deal = getDeal(dealId) → seller
+                                  ixs = escrow.build.fund({ seller, dealId, buyer })
+                                  prepareSponsored(ixs, buyer) → tx + ticket
+3. wallet.signTransaction(tx) ◄─
+4. POST /api/escrow/submit ──►  5. submitSponsored(signed, ticket, buyer) ───► program applies the rules
+                                  → signature (or escrowErrorName(err))
+6. router.refresh() ─────────►  7. getOrder → escrow.fetchOrder(seller, dealId)
+```
+
+Steps for the web:
+
+1. Add the package to the web: `"@closeby/solana": "workspace:*"` in `apps/web/package.json`, and `transpilePackages: ['@closeby/solana']` in a `next.config.ts`. Import from `@closeby/solana/client`, only in server code.
+2. `lib/escrow/server.ts`, chain mode: build one client from `getConnection()`, `USDC_MINT` and the fee payer's public key; `getOrder(dealId, seller)` returns `escrow.fetchOrder(...)` plus `lastSignature` from `findLastSignature`.
+3. Two routes, copying `/api/solana/spike` and `/api/solana/submit`: `prepare` maps the `EscrowAction` type to its `escrow.build.*` call (signer from the session, never from the body; `buyer` for deadline refunds comes from the on-chain order), `submit` relays and maps errors with `escrowErrorName`.
+4. `lib/escrow/client.ts`, chain mode: prepare → `wallet.signTransaction` → submit.
+5. Gaps 1, 2 and 4 below.
+
+To check the program itself at any time: `pnpm --filter @closeby/solana smoke:devnet` runs create → fund → unlock → confirm on Devnet through this same client, with users that hold no SOL, and prints an Explorer link per step.
 
 ## Web integration gaps (chain mode)
 
@@ -87,9 +127,9 @@ Found by comparing `apps/web` with the program on Sat 28 Nov, 02:00. Owner: Mart
 
 | # | Gap | Where | Fix |
 | --- | --- | --- | --- |
-| 1 | `getOrder(dealId)` cannot find an on-chain order: the PDA needs the seller too (`["order", seller, order_id LE]`) | `lib/escrow/server.ts`; callers in `app/vender/actions.ts` (order read before the deal row exists), `app/vender/[dealId]/page.tsx`, `app/deals/[dealId]/page.tsx`, `app/api/deals/[dealId]/download/route.ts` | Change to `getOrder(dealId, seller)`. In `publishSale` the seller comes from the session; elsewhere read the deal first, then the order |
-| 2 | "Ver comprobante" uses `order.lastSignature`, which the program cannot store (a program never knows its own transaction signature) | `app/deals/[dealId]/buyer-panel.tsx` | Use the signature returned by `submitSponsored`, or look it up with `getSignaturesForAddress(orderPda)` |
-| 3 | Buyer and seller USDC accounts must exist before `fund` and before payouts | Chain client in `lib/escrow` | Prepend `createAssociatedTokenAccountIdempotentInstruction` (paid by the fee payer), as agreed in escrow-changes.md |
+| 1 | `getOrder(dealId)` cannot find an on-chain order: the PDA needs the seller too (`["order", seller, order_id LE]`) | `lib/escrow/server.ts`; callers in `app/vender/actions.ts` (order read before the deal row exists), `app/vender/[dealId]/page.tsx`, `app/deals/[dealId]/page.tsx`, `app/api/deals/[dealId]/download/route.ts` | Change to `getOrder(dealId, seller)` and call `escrow.fetchOrder(seller, dealId)`. In `publishSale` the seller comes from the session; elsewhere read the deal first, then the order |
+| 2 | "Ver comprobante" uses `order.lastSignature`, which the program cannot store (a program never knows its own transaction signature) | `app/deals/[dealId]/buyer-panel.tsx` | `escrow.findLastSignature(seller, dealId)`, or the signature `submitSponsored` returns |
+| 3 | Buyer and seller USDC accounts must exist before `fund` and before payouts | `solana/client/instructions.ts` | Done in the client: `escrow.build.*` already prepend the idempotent ATA instruction, paid by the fee payer |
 | 4 | `USDC_MINT` and `FEE_PAYER_SECRET_KEY` in Vercel must be the ones in the deployment record below (the config is locked to that mint) | Vercel env vars | Replace both together if another mint was set |
 
 ## Deployment record

@@ -13,7 +13,15 @@ import {
   getAssociatedTokenAddressSync,
   mintTo,
 } from '@solana/spl-token';
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  sendAndConfirmTransaction,
+  Transaction,
+  type TransactionInstruction,
+} from '@solana/web3.js';
 import { randomBytes } from 'node:crypto';
 import { assert } from 'chai';
 import type { ClosebyEscrow } from '../../target/types/closeby_escrow';
@@ -47,6 +55,10 @@ function confirmedProvider(): anchor.AnchorProvider {
   return new anchor.AnchorProvider(connection, env.wallet, { commitment: 'confirmed', preflightCommitment: 'confirmed' });
 }
 
+/**
+ * One shared testbed for every test file: they run on the same local validator, and the
+ * program has a single config (one mint), so they must share mint and accounts.
+ */
 export class Testbed {
   // Everything at "confirmed": "processed" blockhashes can be rejected by a young validator.
   readonly provider = confirmedProvider();
@@ -76,8 +88,12 @@ export class Testbed {
     [this.programData] = PublicKey.findProgramAddressSync([this.program.programId.toBuffer()], BPF_UPGRADEABLE_LOADER);
   }
 
-  /** Only the admin and our fee payer get SOL. Seller, buyer and stranger have none. */
-  setup = async () => {
+  private ready: Promise<void> | null = null;
+
+  /** Only the admin and our fee payer get SOL. Seller, buyer and stranger have none. Runs once. */
+  setup = () => (this.ready ??= this.prepare());
+
+  private async prepare(): Promise<void> {
     // A fresh local validator rejects early transactions with "Blockhash not found".
     // Wait until it has some history, like Anchor's own test runner does.
     while ((await this.connection.getBlockHeight('confirmed')) < 25) await sleep(400);
@@ -93,16 +109,24 @@ export class Testbed {
     this.sellerToken = await createAssociatedTokenAccount(this.connection, this.feePayer, this.mint, this.seller.publicKey);
     this.strangerToken = await createAssociatedTokenAccount(this.connection, this.feePayer, this.mint, this.stranger.publicKey);
     await mintTo(this.connection, this.admin, this.mint, this.buyerToken, this.admin, 100_000_000_000); // 100.000 test USDC
-  };
+  }
 
   // --- Sending and checking -------------------------------------------------
 
   /** Sends a transaction paid by our fee payer, signed by the given users. */
   send = async (builder: Builder, signers: Keypair[]): Promise<string> => {
     const tx = await builder.transaction();
+    return this.sendTransaction(tx, signers);
+  };
+
+  /** Same as `send`, for instructions built by the client in solana/client/. */
+  sendInstructions = async (instructions: TransactionInstruction[], signers: Keypair[]): Promise<string> =>
+    this.sendTransaction(new Transaction().add(...instructions), signers);
+
+  private async sendTransaction(tx: Transaction, signers: Keypair[]): Promise<string> {
     tx.feePayer = this.feePayer.publicKey;
     return sendAndConfirmTransaction(this.connection, tx, [this.feePayer, ...signers], { commitment: 'confirmed' });
-  };
+  }
 
   /** Expects the transaction to fail with this program error code (or log text). */
   expectError = async (promise: Promise<unknown>, code: string): Promise<void> => {
@@ -195,3 +219,5 @@ export class Testbed {
     return o;
   };
 }
+
+export const testbed = new Testbed();
