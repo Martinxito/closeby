@@ -8,3 +8,10 @@ node_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+
+# Secrets with names the rules above miss (e.g. web-fee-payer.env, keypairs outside solana/)
+*.env
+*-keypair.json
+id.json
+*-id.json
+*.pem
