@@ -30,7 +30,8 @@ export function SellForm() {
   const priceClp = Number(price.replace(/\D/g, ''));
   const busy = step !== 'idle';
 
-  if (!wallet.ready) return null;
+  // The login provider takes a few seconds to start (Privy): say so instead of a blank gap.
+  if (!wallet.ready) return <p className="muted" aria-live="polite">Cargando…</p>;
 
   if (!wallet.address) {
     return (

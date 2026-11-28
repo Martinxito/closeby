@@ -37,7 +37,8 @@ export function BuyerPanel({ dealId, priceClp, order }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [confirmingUnlock, setConfirmingUnlock] = useState(false);
 
-  if (!wallet.ready) return null;
+  // The login provider takes a few seconds to start (Privy): say so instead of a blank gap.
+  if (!wallet.ready) return <p className="muted" aria-live="polite">Cargando…</p>;
   if (!order) return <p className="muted">Esta venta todavía no está lista. Recarga en unos segundos.</p>;
 
   const me = wallet.address;

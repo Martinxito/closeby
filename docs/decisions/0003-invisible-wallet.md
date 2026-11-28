@@ -31,6 +31,8 @@ The program needs users to sign **our own Anchor instructions** (`fund`, `open_d
 
 **Decision:** use **Privy** embedded Solana wallets. Verify in the block 1 spike: Google/email login, signing a transaction with our server as fee payer and no UI prompt, on iPhone and Android. Pollar's partner track is dropped unless they ship custom-instruction support.
 
+**Privy implemented and verified (28 Nov, 10:45):** `apps/web/lib/wallet/privy-provider.tsx` (email or Google login, Solana embedded wallet created on first login, `useSignTransaction` with `showWalletUIs: false`) and `apps/web/lib/auth/privy.ts` (server verifies the access token, then reads the user's embedded Solana wallet from Privy with the app secret). Tested end to end on Devnet with two users: publish, buy, unlock, download and confirm, **no wallet pop-ups**, our server paying every fee. `NEXT_PUBLIC_WALLET_MODE` / `WALLET_MODE` switch between `privy` and the test wallet. Caveats: Google login fails inside Instagram/WhatsApp in-app browsers (email works); Privy does not accept `*.vercel.app` wildcards, so only the production domain and localhost can log in.
+
 **Implemented (27 Nov):** the fee payer relay (`apps/web/lib/solana/relay.ts`) only co-signs transactions our server built, verified with an HMAC ticket and the user's signature (`lib/solana/ticket.ts`). Test balance: our own 6-decimal SPL token, minted by the fee payer (`lib/solana/balance.ts`). Signing spike for Privy: `POST /api/solana/spike` then `POST /api/solana/submit`.
 
 To keep the choice cheap, the web wraps the provider behind one module (`apps/web/lib/wallet/`) exposing `login()`, `logout()`, `useUser()` and `signTransaction(tx)`. Screens never import the provider directly.
