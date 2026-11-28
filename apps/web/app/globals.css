@@ -495,3 +495,23 @@ button:enabled, summary { cursor: pointer; }
 .qr svg { display: block; width: 100%; height: auto; }
 
 .preview-media { width: 100%; border-radius: 1rem; display: block; }
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.timeline li {
+  counter-increment: step;
+  padding-top: 0.55rem;
+  border-top: 4px solid var(--line);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.timeline li::before { content: counter(step) '. '; }
+.timeline li[data-done='true'] { border-top-color: var(--accent); color: var(--ink); }

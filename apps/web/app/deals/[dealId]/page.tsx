@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { AutoRefresh } from '@/components/auto-refresh';
 import { getDeal, isDealId } from '@/lib/deals';
+import { getOrder } from '@/lib/escrow/server';
 import { formatClp, formatFileSize } from '@/lib/format';
 import SiteHeader from '../../site-header';
+import { BuyerPanel } from './buyer-panel';
 import DevnetSigning from './devnet-signing';
 
 export const metadata: Metadata = { title: 'Venta | Closeby' };
 
-// Buyer's view of a deal (Diego). For now it shows the deal and its preview; buying,
-// unlocking and confirming come with the buyer flow (docs/flows/digital-sale.md).
+// Public page of a deal: what the buyer sees and acts on (docs/flows/digital-sale.md).
+// The order comes from the escrow on every render; BuyerPanel only offers allowed actions.
 export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>) {
   const { dealId } = await params;
 
@@ -27,8 +30,9 @@ export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>)
   }
 
   if (!isDealId(dealId)) notFound();
-  const deal = await getDeal(dealId);
+  const [deal, order] = await Promise.all([getDeal(dealId), getOrder(dealId)]);
   if (!deal) notFound();
+  const finished = order?.status === 'Released' || order?.status === 'Refunded';
 
   return (
     <>
@@ -55,11 +59,9 @@ export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>)
         )}
         {deal.communes.length > 0 && <p className="muted">Encuentro en: {deal.communes.join(', ')}</p>}
 
-        <section className="card">
-          <small className="muted">
-            Pagas antes, pero la plata queda protegida: el vendedor la recibe solo cuando confirmas que recibiste el archivo.
-          </small>
-        </section>
+        {deal.kind === 'digital' && <BuyerPanel dealId={dealId} priceClp={deal.price_clp} order={order} />}
+        {/* Picks up the other party's actions (e.g. the buyer paying while the seller watches). */}
+        {!finished && <AutoRefresh />}
       </main>
     </>
   );
@@ -69,11 +71,13 @@ function Preview({ url, type, title }: { url: string | null; type: PreviewType; 
   if (!url) return <p className="muted">El vendedor no agregó una vista previa.</p>;
   switch (type) {
     case 'image':
-      return <img className="preview-media" src={url} alt={`Vista previa de ${title}`} />;
+      // The preview is public by design (the seller uploads only a sample). These attributes
+      // only remove the one-click download shortcuts; anything shown in a browser can be saved.
+      return <img className="preview-media" src={url} alt={`Vista previa de ${title}`} draggable={false} />;
     case 'audio':
-      return <audio className="preview-media" src={url} controls preload="metadata" />;
+      return <audio className="preview-media" src={url} controls controlsList="nodownload" preload="metadata" />;
     case 'video':
-      return <video className="preview-media" src={url} controls preload="metadata" playsInline />;
+      return <video className="preview-media" src={url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture preload="metadata" playsInline />;
     case 'pdf':
       return (
         <a className="button" href={url} target="_blank" rel="noreferrer">

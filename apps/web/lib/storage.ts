@@ -56,3 +56,8 @@ export async function createSignedDownload(bucket: string, path: string, fileNam
   if (error || !data) throw new Error(`Could not create download URL for ${bucket}/${path}: ${error?.message}`);
   return data.signedUrl;
 }
+
+export async function removeStoredFile(bucket: string, path: string): Promise<void> {
+  const { error } = await getSupabase().storage.from(bucket).remove([path]);
+  if (error) console.error(`Could not remove ${bucket}/${path}: ${error.message}`);
+}

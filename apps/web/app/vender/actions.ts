@@ -27,10 +27,13 @@ import {
   createSignedUpload,
   hashStoredFile,
   publicUrl,
+  removeStoredFile,
   safeFileName,
-  storedFileExists,
   type SignedUpload,
 } from '@/lib/storage';
+
+const SAME_PREVIEW_ERROR =
+  'La vista previa no puede ser el archivo completo: cualquiera podría descargarlo sin pagar. Sube solo una muestra.';
 
 type Result<T> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -109,8 +112,13 @@ export async function publishSale(input: PublishSaleInput): Promise<Result<{ dea
 
     let previewUrl: string | null = null;
     if (input.previewPath) {
-      if (!(await storedFileExists(PREVIEWS_BUCKET, input.previewPath))) {
-        return { ok: false, error: 'La vista previa no terminó de subir. Intenta de nuevo.' };
+      // The preview is public: anyone can see and download it before paying. If it is the
+      // very file being sold, the sale would give it away, so delete it and refuse.
+      const previewHash = await hashStoredFile(PREVIEWS_BUCKET, input.previewPath);
+      if (!previewHash) return { ok: false, error: 'La vista previa no terminó de subir. Intenta de nuevo.' };
+      if (previewHash === storedHash) {
+        await removeStoredFile(PREVIEWS_BUCKET, input.previewPath);
+        return { ok: false, error: SAME_PREVIEW_ERROR };
       }
       previewUrl = publicUrl(PREVIEWS_BUCKET, input.previewPath);
     }
