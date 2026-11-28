@@ -14,6 +14,76 @@ export type ClosebyEscrow = {
   },
   "instructions": [
     {
+      "name": "acceptMeeting",
+      "docs": [
+        "The seller accepts the meeting. If nobody confirms by meeting time + grace, the",
+        "buyer can be refunded."
+      ],
+      "discriminator": [
+        109,
+        130,
+        186,
+        193,
+        195,
+        111,
+        142,
+        13
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "buyerCancel",
       "docs": [
         "The buyer changes their mind before unlocking the file: full refund."
@@ -32,7 +102,8 @@ export type ClosebyEscrow = {
         {
           "name": "caller",
           "docs": [
-            "buyer_cancel: must be the buyer. refund_after_deadline: anyone."
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
           ],
           "signer": true
         },
@@ -174,7 +245,8 @@ export type ClosebyEscrow = {
     {
       "name": "confirmHandover",
       "docs": [
-        "The buyer got the file and presses \"Recibí el archivo\": the seller is paid."
+        "The buyer presses \"Recibí el archivo\" (digital) or \"Recibí el producto\"",
+        "(in-person, after the seller accepted the meeting): the seller is paid."
       ],
       "discriminator": [
         208,
@@ -543,6 +615,165 @@ export type ClosebyEscrow = {
       ]
     },
     {
+      "name": "declineMeeting",
+      "docs": [
+        "The seller declines the meeting: full refund."
+      ],
+      "discriminator": [
+        207,
+        221,
+        133,
+        136,
+        10,
+        26,
+        119,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
+          ],
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "buyerToken",
+          "docs": [
+            "Must belong to the recorded buyer: the caller cannot redirect the refund."
+          ],
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "fund",
       "docs": [
         "The buyer pays. The exact order amount moves from the buyer's USDC account into",
@@ -717,6 +948,195 @@ export type ClosebyEscrow = {
       "args": []
     },
     {
+      "name": "fundAndSchedule",
+      "docs": [
+        "The buyer pays and proposes a meeting: when (`meeting_time`, unix seconds) and",
+        "where (`place_hash`, SHA-256 of the place; the place itself stays off-chain).",
+        "The seller must answer before `accept_deadline`."
+      ],
+      "discriminator": [
+        167,
+        46,
+        15,
+        4,
+        172,
+        175,
+        23,
+        2
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "buyerToken",
+          "docs": [
+            "The buyer's USDC: must be theirs and of the right token."
+          ],
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "meetingTime",
+          "type": "i64"
+        },
+        {
+          "name": "placeHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "initConfig",
       "docs": [
         "One-time setup right after deploy. Only the program's upgrade authority (the",
@@ -870,7 +1290,8 @@ export type ClosebyEscrow = {
     {
       "name": "refundAfterDeadline",
       "docs": [
-        "The buyer paid but never unlocked the file in time: full refund.",
+        "Digital: the buyer paid but never unlocked the file in time. In-person: nobody",
+        "confirmed by meeting time + grace. Full refund either way.",
         "Anyone can trigger it, but the money only ever goes to the buyer."
       ],
       "discriminator": [
@@ -887,7 +1308,326 @@ export type ClosebyEscrow = {
         {
           "name": "caller",
           "docs": [
-            "buyer_cancel: must be the buyer. refund_after_deadline: anyone."
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
+          ],
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "buyerToken",
+          "docs": [
+            "Must belong to the recorded buyer: the caller cannot redirect the refund."
+          ],
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "refundUnaccepted",
+      "docs": [
+        "The seller did not answer in time: full refund. Anyone can trigger it."
+      ],
+      "discriminator": [
+        255,
+        189,
+        77,
+        9,
+        183,
+        102,
+        85,
+        16
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
+          ],
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "buyerToken",
+          "docs": [
+            "Must belong to the recorded buyer: the caller cannot redirect the refund."
+          ],
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "rejectAtMeeting",
+      "docs": [
+        "At the meeting (from 30 minutes before), the item is not what was offered: full refund."
+      ],
+      "discriminator": [
+        58,
+        180,
+        101,
+        17,
+        219,
+        241,
+        247,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
           ],
           "signer": true
         },
@@ -1184,6 +1924,165 @@ export type ClosebyEscrow = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "sellerCancel",
+      "docs": [
+        "The seller cancels after accepting: full refund."
+      ],
+      "discriminator": [
+        32,
+        135,
+        125,
+        225,
+        9,
+        49,
+        24,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "buyer_cancel, reject_at_meeting: the buyer. decline_meeting, seller_cancel: the seller.",
+            "refund_after_deadline, refund_unaccepted: anyone."
+          ],
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.seller",
+                "account": "order"
+              },
+              {
+                "kind": "account",
+                "path": "order.orderId",
+                "account": "order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "buyerToken",
+          "docs": [
+            "Must belong to the recorded buyer: the caller cannot redirect the refund."
+          ],
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -1215,6 +2114,32 @@ export type ClosebyEscrow = {
     }
   ],
   "events": [
+    {
+      "name": "meetingAccepted",
+      "discriminator": [
+        91,
+        210,
+        192,
+        1,
+        237,
+        140,
+        179,
+        104
+      ]
+    },
+    {
+      "name": "meetingScheduled",
+      "discriminator": [
+        120,
+        14,
+        214,
+        245,
+        116,
+        223,
+        165,
+        224
+      ]
+    },
     {
       "name": "orderCreated",
       "discriminator": [
@@ -1346,6 +2271,36 @@ export type ClosebyEscrow = {
       "code": 6012,
       "name": "overflow",
       "msg": "Arithmetic overflow."
+    },
+    {
+      "code": 6013,
+      "name": "wrongOrderKind",
+      "msg": "This action is for the other kind of order (digital vs in-person)."
+    },
+    {
+      "code": 6014,
+      "name": "notSeller",
+      "msg": "Only the seller can do this."
+    },
+    {
+      "code": 6015,
+      "name": "meetingInPast",
+      "msg": "The meeting must be in the future."
+    },
+    {
+      "code": 6016,
+      "name": "invalidPlaceHash",
+      "msg": "An in-person order needs the SHA-256 of the meeting place."
+    },
+    {
+      "code": 6017,
+      "name": "acceptWindowClosed",
+      "msg": "The time to accept the meeting has passed."
+    },
+    {
+      "code": 6018,
+      "name": "tooEarlyToReject",
+      "msg": "The item can only be rejected from 30 minutes before the meeting."
     }
   ],
   "types": [
@@ -1399,6 +2354,69 @@ export type ClosebyEscrow = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meetingAccepted",
+      "docs": [
+        "In-person: the seller accepted the meeting."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "meetingTime",
+            "type": "i64"
+          },
+          {
+            "name": "releaseDeadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meetingScheduled",
+      "docs": [
+        "In-person: the buyer paid and proposed a meeting."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "meetingTime",
+            "type": "i64"
+          },
+          {
+            "name": "placeHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "acceptDeadline",
+            "type": "i64"
           }
         ]
       }

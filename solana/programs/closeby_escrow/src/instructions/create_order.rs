@@ -49,9 +49,12 @@ pub fn handle_create_order(
     content_hash: [u8; 32],
 ) -> Result<()> {
     require!(amount > 0, EscrowError::InvalidAmount);
-    // In-person orders need meeting fields and their own instructions: not in this version.
-    require!(kind == OrderKind::Digital, EscrowError::PhysicalNotSupported);
-    require!(content_hash != [0u8; 32], EscrowError::InvalidContentHash);
+    match kind {
+        // A digital order commits to its file: the hash can never be empty.
+        OrderKind::Digital => require!(content_hash != [0u8; 32], EscrowError::InvalidContentHash),
+        // An in-person order has no file: the meeting place is committed later, by the buyer.
+        OrderKind::Physical => require!(content_hash == [0u8; 32], EscrowError::InvalidContentHash),
+    }
 
     let order = &mut ctx.accounts.order;
     order.set_inner(Order {
@@ -66,7 +69,7 @@ pub fn handle_create_order(
         created_at: now()?,
         claim_deadline: 0,
         release_deadline: 0,
-        // Reserved for in-person orders; always zero for digital ones.
+        // In-person fields are set by fund_and_schedule; always zero for digital orders.
         meeting_time: 0,
         place_hash: [0u8; 32],
         accept_deadline: 0,

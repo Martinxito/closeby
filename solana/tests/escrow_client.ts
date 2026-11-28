@@ -46,6 +46,9 @@ describe('escrow client', () => {
       status: 'Created',
       claimDeadline: null,
       releaseDeadline: null,
+      meetingTime: null,
+      placeHash: null,
+      acceptDeadline: null,
     });
 
     await sendInstructions(await escrow.build.fund(ref), [buyer]);

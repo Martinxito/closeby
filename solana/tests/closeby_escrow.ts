@@ -128,8 +128,8 @@ describe('closeby_escrow', () => {
       await expectError(send(createOrderTx(randomOrderId(), { amount: new BN(0) }), [seller]), 'InvalidAmount');
     });
 
-    it('in-person orders (not in this version)', async () => {
-      await expectError(send(createOrderTx(randomOrderId(), { kind: 'physical' }), [seller]), 'PhysicalNotSupported');
+    it('an in-person order carrying a file hash (in-person flow: tests/in_person.ts)', async () => {
+      await expectError(send(createOrderTx(randomOrderId(), { kind: 'physical' }), [seller]), 'InvalidContentHash');
     });
 
     it('a token other than the configured USDC', async () => {

@@ -86,12 +86,14 @@ pub mod closeby_escrow {
         instructions::refund::handle_buyer_cancel(ctx)
     }
 
-    /// The buyer got the file and presses "Recibí el archivo": the seller is paid.
+    /// The buyer presses "Recibí el archivo" (digital) or "Recibí el producto"
+    /// (in-person, after the seller accepted the meeting): the seller is paid.
     pub fn confirm_handover(ctx: Context<Release>) -> Result<()> {
         instructions::release::handle_confirm_handover(ctx)
     }
 
-    /// The buyer paid but never unlocked the file in time: full refund.
+    /// Digital: the buyer paid but never unlocked the file in time. In-person: nobody
+    /// confirmed by meeting time + grace. Full refund either way.
     /// Anyone can trigger it, but the money only ever goes to the buyer.
     pub fn refund_after_deadline(ctx: Context<Refund>) -> Result<()> {
         instructions::refund::handle_refund_after_deadline(ctx)
@@ -101,5 +103,40 @@ pub mod closeby_escrow {
     /// is paid. Anyone can trigger it, but the money only ever goes to the seller.
     pub fn release_after_deadline(ctx: Context<Release>) -> Result<()> {
         instructions::release::handle_release_after_deadline(ctx)
+    }
+
+    // --- In-person orders (docs/in-person-proposal.md) -------------------------------
+
+    /// The buyer pays and proposes a meeting: when (`meeting_time`, unix seconds) and
+    /// where (`place_hash`, SHA-256 of the place; the place itself stays off-chain).
+    /// The seller must answer before `accept_deadline`.
+    pub fn fund_and_schedule(ctx: Context<Fund>, meeting_time: i64, place_hash: [u8; 32]) -> Result<()> {
+        instructions::fund_and_schedule::handle_fund_and_schedule(ctx, meeting_time, place_hash)
+    }
+
+    /// The seller accepts the meeting. If nobody confirms by meeting time + grace, the
+    /// buyer can be refunded.
+    pub fn accept_meeting(ctx: Context<AcceptMeeting>) -> Result<()> {
+        instructions::accept_meeting::handle_accept_meeting(ctx)
+    }
+
+    /// The seller declines the meeting: full refund.
+    pub fn decline_meeting(ctx: Context<Refund>) -> Result<()> {
+        instructions::refund::handle_decline_meeting(ctx)
+    }
+
+    /// The seller did not answer in time: full refund. Anyone can trigger it.
+    pub fn refund_unaccepted(ctx: Context<Refund>) -> Result<()> {
+        instructions::refund::handle_refund_unaccepted(ctx)
+    }
+
+    /// At the meeting (from 30 minutes before), the item is not what was offered: full refund.
+    pub fn reject_at_meeting(ctx: Context<Refund>) -> Result<()> {
+        instructions::refund::handle_reject_at_meeting(ctx)
+    }
+
+    /// The seller cancels after accepting: full refund.
+    pub fn seller_cancel(ctx: Context<Refund>) -> Result<()> {
+        instructions::refund::handle_seller_cancel(ctx)
     }
 }

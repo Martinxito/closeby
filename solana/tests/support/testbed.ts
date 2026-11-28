@@ -28,9 +28,16 @@ import type { ClosebyEscrow } from '../../target/types/closeby_escrow';
 
 export const CLAIM_SECS = 5;
 export const REVIEW_SECS = 5;
+/** In-person: refund opens this long after the meeting (Devnet uses 3600). */
+export const GRACE_SECS = 5;
+/** In-person: the seller has this long to accept (capped at the meeting time). */
+export const ACCEPT_SECS = 3600;
 export const WAIT_PAST_WINDOW_MS = (CLAIM_SECS + 3) * 1000;
 export const PRICE = new BN(315_789); // ≈ $300.000 CLP at 950 CLP per USDC, 6 decimals
 export const FILE_HASH = Array.from(randomBytes(32));
+export const ZERO_HASH = new Array<number>(32).fill(0);
+/** SHA-256 of the meeting place; the place itself stays off-chain. */
+export const PLACE_HASH = Array.from(randomBytes(32));
 const BPF_UPGRADEABLE_LOADER = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
 
 export type OrderRef = { order: PublicKey; vault: PublicKey };
@@ -157,7 +164,7 @@ export class Testbed {
 
   initConfigTx = (who: Keypair) =>
     this.program.methods
-      .initConfig(new BN(3600), new BN(3600), new BN(CLAIM_SECS), new BN(REVIEW_SECS))
+      .initConfig(new BN(ACCEPT_SECS), new BN(GRACE_SECS), new BN(CLAIM_SECS), new BN(REVIEW_SECS))
       .accountsPartial({
         admin: who.publicKey,
         config: this.configPda,
@@ -195,6 +202,28 @@ export class Testbed {
   releaseTx = (o: OrderRef, who = this.stranger, to = this.sellerToken) =>
     this.program.methods.releaseAfterDeadline().accountsPartial(this.vaultAccounts(o, who, { sellerToken: to }));
 
+  // In-person -----------------------------------------------------------------
+
+  scheduleTx = (o: OrderRef, meetingTime: number, placeHash = PLACE_HASH, who = this.buyer, from = this.buyerToken) =>
+    this.program.methods
+      .fundAndSchedule(new BN(meetingTime), placeHash)
+      .accountsPartial({ buyer: who.publicKey, config: this.configPda, order: o.order, mint: this.mint, buyerToken: from, vault: o.vault });
+
+  acceptTx = (o: OrderRef, who = this.seller) =>
+    this.program.methods.acceptMeeting().accountsPartial({ seller: who.publicKey, config: this.configPda, order: o.order });
+
+  declineTx = (o: OrderRef, who = this.seller, to = this.buyerToken) =>
+    this.program.methods.declineMeeting().accountsPartial(this.vaultAccounts(o, who, { buyerToken: to }));
+
+  refundUnacceptedTx = (o: OrderRef, who = this.stranger, to = this.buyerToken) =>
+    this.program.methods.refundUnaccepted().accountsPartial(this.vaultAccounts(o, who, { buyerToken: to }));
+
+  rejectTx = (o: OrderRef, who = this.buyer, to = this.buyerToken) =>
+    this.program.methods.rejectAtMeeting().accountsPartial(this.vaultAccounts(o, who, { buyerToken: to }));
+
+  sellerCancelTx = (o: OrderRef, who = this.seller, to = this.buyerToken) =>
+    this.program.methods.sellerCancel().accountsPartial(this.vaultAccounts(o, who, { buyerToken: to }));
+
   private vaultAccounts<T extends object>(o: OrderRef, who: Keypair, destination: T) {
     return { caller: who.publicKey, order: o.order, mint: this.mint, vault: o.vault, ...destination };
   }
@@ -211,6 +240,34 @@ export class Testbed {
     const o = await this.createOrder();
     await this.send(this.fundTx(o), [this.buyer]);
     return o;
+  };
+
+  /** An in-person order (no file hash). */
+  createPhysical = async (): Promise<OrderRef> => {
+    const orderId = randomOrderId();
+    await this.send(this.createOrderTx(orderId, { kind: 'physical', hash: ZERO_HASH }), [this.seller]);
+    return this.orderAddresses(this.seller.publicKey, orderId);
+  };
+
+  /** In-person: paid, meeting proposed `inSecs` from now (default: in one hour). */
+  proposed = async (inSecs = 3600): Promise<OrderRef & { meetingTime: number }> => {
+    const o = await this.createPhysical();
+    const meetingTime = (await this.chainNow()) + inSecs;
+    await this.send(this.scheduleTx(o, meetingTime), [this.buyer]);
+    return { ...o, meetingTime };
+  };
+
+  /** In-person: meeting accepted by the seller. */
+  scheduled = async (inSecs = 3600): Promise<OrderRef & { meetingTime: number }> => {
+    const o = await this.proposed(inSecs);
+    await this.send(this.acceptTx(o), [this.seller]);
+    return o;
+  };
+
+  /** The validator's clock (unix seconds), which the program compares deadlines against. */
+  chainNow = async (): Promise<number> => {
+    const slot = await this.connection.getSlot('confirmed');
+    return (await this.connection.getBlockTime(slot)) ?? Math.floor(Date.now() / 1000);
   };
 
   delivered = async (): Promise<OrderRef> => {

@@ -19,8 +19,11 @@ export type EscrowOrder = {
   amount: number; // USDC base units (6 decimals); safe as a number below 2^53
   contentHash: string | null; // SHA-256 of the file, lowercase hex
   status: OrderStatus;
-  claimDeadline: number | null; // unix seconds; null until funded
-  releaseDeadline: number | null; // unix seconds; null until delivered
+  claimDeadline: number | null; // digital, unix seconds; null until funded
+  releaseDeadline: number | null; // unix seconds; null until delivered (digital) or accepted (in-person)
+  meetingTime: number | null; // in-person, unix seconds; null until the buyer proposes
+  placeHash: string | null; // in-person, SHA-256 of the meeting place (hex); null until proposed
+  acceptDeadline: number | null; // in-person, unix seconds; the seller must accept before it
 };
 
 type RawOrder = IdlAccounts<ClosebyEscrow>['order'];
@@ -43,6 +46,9 @@ export function toEscrowOrder(raw: RawOrder): EscrowOrder {
     status: statusName(raw.status),
     claimDeadline: raw.claimDeadline.isZero() ? null : raw.claimDeadline.toNumber(),
     releaseDeadline: raw.releaseDeadline.isZero() ? null : raw.releaseDeadline.toNumber(),
+    meetingTime: raw.meetingTime.isZero() ? null : raw.meetingTime.toNumber(),
+    placeHash: Buffer.from(raw.placeHash).every((b) => b === 0) ? null : Buffer.from(raw.placeHash).toString('hex'),
+    acceptDeadline: raw.acceptDeadline.isZero() ? null : raw.acceptDeadline.toNumber(),
   };
 }
 

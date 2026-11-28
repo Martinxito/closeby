@@ -13,6 +13,17 @@ pub fn require_digital(order: &Order) -> Result<()> {
     Ok(())
 }
 
+/// For in-person-only instructions: a digital order is the wrong kind.
+pub fn require_physical(order: &Order) -> Result<()> {
+    require!(order.kind == OrderKind::Physical, EscrowError::WrongOrderKind);
+    Ok(())
+}
+
+pub fn require_seller(order: &Order, signer: &Pubkey) -> Result<()> {
+    require!(order.seller == *signer, EscrowError::NotSeller);
+    Ok(())
+}
+
 pub fn require_status(order: &Order, expected: OrderStatus) -> Result<()> {
     require!(order.status == expected, EscrowError::InvalidStatus);
     Ok(())
