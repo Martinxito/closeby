@@ -96,6 +96,35 @@ Sub-cent fees make a $5.000 CLP sale viable, finality in about a second makes "p
 - **On-chain**: the escrow program on Devnet, with our own 6-decimal SPL token as test USDC.
 - **Server checks**: who is calling comes from a verified session token, never from an address in the request; downloads go only to the order's on-chain buyer after `open_delivery`; a preview identical to the file is rejected.
 
+## Tracks and partner integrations
+
+| Track | Why Closeby fits |
+| --- | --- |
+| **Solana: Best App Overall** | A complete consumer app on Devnet: own Anchor program, real users' flow end to end, no wallet or SOL needed by users |
+| **Solana: Best DeFi App** | Programmable, trust-minimized payments between two strangers (below) |
+| **Supabase** | Database, private and public storage, signed URLs and server-only access, all tied to the on-chain state (below) |
+
+### Solana: DeFi
+
+Closeby is a **payment primitive**: a two-party escrow where settlement is enforced by the program, not by a company holding the money.
+
+- **Funds move only by rule**: buyer → vault on `fund`, vault → seller on `confirm_handover` or after the review window, vault → buyer on `buyer_cancel` or after the claim window. There is no admin withdrawal and no instruction that sends money to the caller ([`instructions/release.rs`](solana/programs/closeby_escrow/src/instructions/release.rs), [`instructions/refund.rs`](solana/programs/closeby_escrow/src/instructions/refund.rs), [`rules.rs`](solana/programs/closeby_escrow/src/rules.rs)). On Devnet the program is still upgradeable by the team; before real money its upgrade authority would be moved to a multisig or revoked.
+- **Money is never stuck**: every funded state has a deadline that anyone can execute, so settlement does not depend on either party staying online.
+- **Accessible**: sub-cent fees, paid by our relay so users need no SOL ([`apps/web/lib/solana/relay.ts`](apps/web/lib/solana/relay.ts)); prices shown in CLP; checked SPL transfers of a USDC-like token.
+- **Composable**: the order and vault are PDAs any client can read, and the IDL is published ([`solana/idl/closeby_escrow.json`](solana/idl/closeby_escrow.json)).
+
+### Supabase
+
+Supabase holds everything that must not go on-chain: listings, the files being sold and their previews. Solana stays the source of truth for money; Supabase is only trusted after the server checks it against the chain.
+
+| What | How | Where |
+| --- | --- | --- |
+| **Postgres: `deals`** (title, price in CLP, file metadata, preview URL) | Saved only after the server verifies the on-chain order exists with this seller, amount and file hash | [`supabase/migrations/0001_deals.sql`](supabase/migrations/0001_deals.sql), [`0003_digital_goods.sql`](supabase/migrations/0003_digital_goods.sql), [`apps/web/lib/deals.ts`](apps/web/lib/deals.ts), [`apps/web/app/vender/actions.ts`](apps/web/app/vender/actions.ts) |
+| **Server-only access** | RLS on, every privilege revoked from `anon` and `authenticated`; only server code with the secret key (`import 'server-only'`) reaches the data. Verified: the publishable key cannot read or write anything | [`0002_server_only_access.sql`](supabase/migrations/0002_server_only_access.sql), [`apps/web/lib/supabase.ts`](apps/web/lib/supabase.ts), [decision 0001](docs/decisions/0001-supabase-server-only.md) |
+| **Storage: private `files` bucket** (the goods) | Browser uploads straight to Storage with a one-time **signed upload URL** (files never pass through Vercel). The server then downloads the stored file, **re-computes its SHA-256 and compares it with the `content_hash` on-chain** before publishing | [`apps/web/lib/storage.ts`](apps/web/lib/storage.ts), [`apps/web/app/vender/actions.ts`](apps/web/app/vender/actions.ts) |
+| **Storage: signed download URLs** | A 5-minute link, served as an attachment, only to the order's on-chain buyer after `open_delivery` | [`apps/web/app/api/deals/[dealId]/download/route.ts`](apps/web/app/api/deals/%5BdealId%5D/download/route.ts) |
+| **Storage: public `previews` bucket** | Samples the buyer sees before paying; a preview identical to the sold file is deleted and the sale refused | [`apps/web/app/vender/actions.ts`](apps/web/app/vender/actions.ts) |
+
 ## Deployed on Devnet
 
 | Item | Value |
