@@ -1291,7 +1291,8 @@ export type ClosebyEscrow = {
       "name": "refundAfterDeadline",
       "docs": [
         "Digital: the buyer paid but never unlocked the file in time. In-person: nobody",
-        "confirmed by meeting time + grace. Full refund either way."
+        "confirmed by meeting time + grace. Full refund either way.",
+        "Anyone can trigger it, but the money only ever goes to the buyer."
       ],
       "discriminator": [
         175,
