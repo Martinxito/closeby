@@ -18,6 +18,53 @@ export async function fetchMeetingPlace(dealId: string, wallet: Wallet): Promise
   return (await call('GET', dealId, wallet)).venue;
 }
 
+// Paying (on-chain) and saving the place (our server) are two requests. If the connection
+// drops between them, the buyer has paid but the seller does not know where to meet. So
+// the buyer's browser keeps the place until the server has it, and retries from there.
+// localStorage, not sessionStorage: it survives closing the tab or the in-app browser.
+const pendingKey = (dealId: string) => `closeby:pending-place:${dealId}`;
+
+/** Keeps the place in this browser until the server confirms it saved it. */
+export function rememberPendingPlace(dealId: string, venue: string): void {
+  try {
+    localStorage.setItem(pendingKey(dealId), venue.trim());
+  } catch {
+    // Storage blocked (private mode): the first save attempt is all we get.
+  }
+}
+
+/**
+ * Saves the place kept in this browser, if it matches the order's on-chain hash.
+ * Returns the saved place, or null if this browser has no matching place.
+ */
+export async function savePendingPlace(dealId: string, expectedHash: string, wallet: Wallet): Promise<string | null> {
+  const venue = readPendingPlace(dealId);
+  if (!venue) return null;
+  if ((await placeHash(venue)) !== expectedHash) {
+    forgetPendingPlace(dealId); // left over from an attempt that did not go through
+    return null;
+  }
+  await saveMeetingPlace(dealId, venue, wallet);
+  forgetPendingPlace(dealId);
+  return venue;
+}
+
+export function forgetPendingPlace(dealId: string): void {
+  try {
+    localStorage.removeItem(pendingKey(dealId));
+  } catch {
+    // Nothing to clean up if storage is blocked.
+  }
+}
+
+function readPendingPlace(dealId: string): string | null {
+  try {
+    return localStorage.getItem(pendingKey(dealId));
+  } catch {
+    return null;
+  }
+}
+
 async function call(method: 'GET' | 'POST', dealId: string, wallet: Wallet, body?: unknown): Promise<{ venue: string | null }> {
   const token = await wallet.getAccessToken();
   if (!token) throw new UserError('Entra para continuar.');

@@ -1,6 +1,6 @@
 # Proposal: in-person sales (and services) on the same program
 
-**Status:** approved Sat 28 Nov, 10:50 (option B, minimal: no reschedule, no late-cancel fee). Program in branch `feat/escrow-in-person` (needs `anchor build`/`anchor test` and a Devnet upgrade); web in `feat/web-in-person` (works on the mock today). **Program owner:** Alex/Aaron.
+**Status:** approved Sat 28 Nov, 10:50 (option B, minimal: no reschedule, no late-cancel fee), and **implemented**: program in #21 (48 tests, Devnet upgraded, see the deployment record in [program-plan.md](program-plan.md#deployment-record)), web in #22. Run `supabase/migrations/0004_in_person.sql` for mock mode. **Program owner:** Alex/Aaron.
 **Based on:** the original in-person spec (old `CLAUDE.md`, commit `7437880`) and [solana/README.md](../solana/README.md), adapted to the program as deployed ([program-plan.md](program-plan.md)).
 
 ## What it adds
