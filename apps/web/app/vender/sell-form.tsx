@@ -7,6 +7,7 @@ import { EscrowError } from '@/lib/escrow/types';
 import { clpToUsdcUnits, formatClp, formatFileSize } from '@/lib/format';
 import { useWallet } from '@/lib/wallet';
 import { prepareSale, publishSale } from './actions';
+import { UserError, friendlyMessage } from '@/lib/user-error';
 
 type Step = 'idle' | 'uploading' | 'reserving' | 'publishing';
 
@@ -54,7 +55,7 @@ export function SellForm() {
       setStep('uploading');
       const contentHashPromise = sha256Hex(file);
       if (preview && (await sha256Hex(preview)) === (await contentHashPromise)) {
-        throw new Error('La vista previa no puede ser el archivo completo: cualquiera podría descargarlo sin pagar. Sube solo una muestra.');
+        throw new UserError('La vista previa no puede ser el archivo completo: cualquiera podría descargarlo sin pagar. Sube solo una muestra.');
       }
 
       // 1. Deal ID and one-time upload links.
@@ -62,7 +63,7 @@ export function SellForm() {
         file: { name: file.name, size: file.size },
         preview: preview ? { name: preview.name, size: preview.size, type: preview.type } : null,
       });
-      if (!prepared.ok) throw new Error(prepared.error);
+      if (!prepared.ok) throw new UserError(prepared.error);
 
       // 2. Upload straight to storage (the file's hash is already being computed above).
       const [contentHash] = await Promise.all([
@@ -93,11 +94,11 @@ export function SellForm() {
         contentHash,
         previewPath: prepared.preview?.path ?? null,
       });
-      if (!published.ok) throw new Error(published.error);
+      if (!published.ok) throw new UserError(published.error);
 
       router.push(`/vender/${published.dealId}`);
     } catch (err) {
-      setError(err instanceof EscrowError ? 'No pudimos crear tu venta protegida. Intenta de nuevo.' : messageOf(err));
+      setError(err instanceof EscrowError ? 'No pudimos crear tu venta protegida. Intenta de nuevo.' : friendlyMessage(err));
       setStep('idle');
     }
   }
@@ -166,6 +167,9 @@ export function SellForm() {
 
 async function sha256Hex(file: File): Promise<string> {
   // crypto.subtle only exists on HTTPS or localhost: test from a phone on the Vercel URL.
+  if (!globalThis.crypto?.subtle) {
+    throw new UserError('Abre Closeby desde su dirección segura (https) para publicar.');
+  }
   const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -176,9 +180,6 @@ async function upload(url: string, file: File): Promise<void> {
     headers: { 'Content-Type': file.type || 'application/octet-stream' },
     body: file,
   });
-  if (!response.ok) throw new Error('No pudimos subir el archivo. Revisa tu conexión e intenta de nuevo.');
+  if (!response.ok) throw new UserError('No pudimos subir el archivo. Revisa tu conexión e intenta de nuevo.');
 }
 
-function messageOf(err: unknown): string {
-  return err instanceof Error && err.message ? err.message : 'Algo salió mal. Intenta de nuevo.';
-}
