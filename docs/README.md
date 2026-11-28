@@ -9,6 +9,7 @@ Start here. This folder is the shared memory of the project: product rules, deci
 3. [escrow-changes.md](escrow-changes.md): what the Solana program must support. Shared contract between web and program.
 4. [plan.md](plan.md): blocks, owners and checkpoints until submission. The program's own step-by-step plan is [program-plan.md](program-plan.md).
 5. [decisions/](decisions/): why things are the way they are. One file per decision.
+6. [in-person-proposal.md](in-person-proposal.md): proposal to add in-person sales (and services) to the same program, for the Saturday 13:00 sync.
 
 ## Decisions
 

@@ -79,7 +79,7 @@ Never commit keypairs (`*.json` wallets, `.env*`), and never share Phantom's rec
 | 4 | Help the web integrate: build the instructions from the IDL for `lib/escrow` chain mode, together with Martín | One real `create_order` + `fund` on Devnet from the web |
 | 5 | Fix what integration finds (redeploy to the same program ID if needed) | End-to-end flow works on Devnet |
 | 6 | README program section: program ID, mint, config values, instructions and rules, how to run the tests; flow diagram (Excalidraw screenshot) | Section merged before 20:00 |
-| 7 | Only if the 13:00 sync approves and time allows: physical instructions | Decided at 13:00 |
+| 7 | Only if the 13:00 sync approves and time allows: physical instructions, following [in-person-proposal.md](in-person-proposal.md) | Decided at 13:00 |
 
 ## Web integration gaps (chain mode)
 
