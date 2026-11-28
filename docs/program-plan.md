@@ -52,7 +52,7 @@ The program keypair (`solana/target/deploy/closeby_escrow-keypair.json`, gitigno
 
 ## Aaron
 
-Progress: 1 to 6 done on Sat 01:20 (27 tests passing, program on Devnet). Next: 7.
+Progress: 1 to 7 done on Sat 01:35 (program on Devnet, config initialized). Next: 8, hand-off.
 
 | # | Task | Done when |
 | --- | --- | --- |
@@ -87,10 +87,11 @@ Fill in after step 6 and 7:
 | Item | Value |
 | --- | --- |
 | Program ID (Devnet) | `4vaVcMbVh5czXPMw3w6FCp8AFjNNuVtaquppq6ZEzugT` (deployed Sat 28 Nov, slot 527104436) |
-| Config PDA | |
-| Test USDC mint | |
+| Config PDA | `GgvJPDvGh58K2x4b3afCnsqP9Y556MkKVHWaEfh9Tyem` |
+| Test USDC mint | `9REWY6ZAJbt6UaH1nLetb6i7tApvLWzr9m3TSo5ZCnkz` (6 decimals; authority = web fee payer `DhuJTzRRuLLHdHt5BsreqvZR9i8qiskVktprDsUF64BA`) |
 | `digital_claim_secs` / `digital_review_secs` | 600 / 300 |
 | Deploy transaction | `TWcRsxwuWaLiXqcMMuSej1ZpejzpHSndLL8CddNfmWhJPTgewwpDKg9qgqFGv3LYBVvCP4rEQc2mDiBvCi1qtVi` |
 | Upgrade authority | `J2m4KAUHetgikUpGYgGVtDw7tuhKVXzgcouTycjJavix` |
 | ProgramData | `9xesLoZxwRJJfw8LnDc5Yd46acrnPZwad555prvnTjKB` |
-| `init_config` transaction | |
+| `init_config` transaction | `5KvPjxCzrmQTr51mpcE472MS2pdnxDKriQsHQsMi475q81HYHoF5NnEykR95X2Yw4kuokcKrA6Pc4TXJ8jF1sPiW` |
+| IDL for the web | `solana/idl/closeby_escrow.json` and `solana/idl/closeby_escrow.ts` (copied from `target/` after each build) |
