@@ -36,3 +36,22 @@ pub struct OrderRefunded {
     pub buyer: Pubkey,
     pub amount: u64,
 }
+
+/// In-person: the buyer paid and proposed a meeting.
+#[event]
+pub struct MeetingScheduled {
+    pub order: Pubkey,
+    pub buyer: Pubkey,
+    pub amount: u64,
+    pub meeting_time: i64,
+    pub place_hash: [u8; 32],
+    pub accept_deadline: i64,
+}
+
+/// In-person: the seller accepted the meeting.
+#[event]
+pub struct MeetingAccepted {
+    pub order: Pubkey,
+    pub meeting_time: i64,
+    pub release_deadline: i64,
+}

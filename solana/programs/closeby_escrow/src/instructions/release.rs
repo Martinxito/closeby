@@ -1,4 +1,4 @@
-//! Money to the seller: confirm_handover and release_after_deadline.
+//! Money to the seller: confirm_handover (digital and in-person) and release_after_deadline (digital).
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
@@ -6,7 +6,7 @@ use crate::constants::ORDER_SEED;
 use crate::errors::EscrowError;
 use crate::events::OrderReleased;
 use crate::rules::{now, pay_out, require_buyer, require_digital, require_status};
-use crate::state::{Order, OrderStatus};
+use crate::state::{Order, OrderKind, OrderStatus};
 
 #[derive(Accounts)]
 pub struct Release<'info> {
@@ -39,8 +39,12 @@ pub struct Release<'info> {
 
 pub fn handle_confirm_handover(ctx: Context<Release>) -> Result<()> {
     let order = &ctx.accounts.order;
-    require_digital(order)?;
-    require_status(order, OrderStatus::Delivered)?;
+    // Digital: after unlocking the file. In-person: once the seller accepted the meeting.
+    let expected = match order.kind {
+        OrderKind::Digital => OrderStatus::Delivered,
+        OrderKind::Physical => OrderStatus::Scheduled,
+    };
+    require_status(order, expected)?;
     require_buyer(order, &ctx.accounts.caller.key())?;
 
     pay_seller(ctx)

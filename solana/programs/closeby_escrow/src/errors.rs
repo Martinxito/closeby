@@ -30,4 +30,17 @@ pub enum EscrowError {
     WrongTokenAccount,
     #[msg("Arithmetic overflow.")]
     Overflow,
+    // In-person orders (appended: existing codes must not move).
+    #[msg("This action is for the other kind of order (digital vs in-person).")]
+    WrongOrderKind,
+    #[msg("Only the seller can do this.")]
+    NotSeller,
+    #[msg("The meeting must be in the future.")]
+    MeetingInPast,
+    #[msg("An in-person order needs the SHA-256 of the meeting place.")]
+    InvalidPlaceHash,
+    #[msg("The time to accept the meeting has passed.")]
+    AcceptWindowClosed,
+    #[msg("The item can only be rejected from 30 minutes before the meeting.")]
+    TooEarlyToReject,
 }

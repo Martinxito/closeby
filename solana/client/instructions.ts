@@ -65,11 +65,22 @@ export function createBuilders(program: EscrowProgram, mint: PublicKey, feePayer
   // --- Builders -------------------------------------------------------------
 
   return {
-    /** Seller publishes a digital sale. `amount` in USDC base units; `contentHash` is the file's SHA-256 in hex. */
-    async createOrder(ref: OrderRef & { amount: number | bigint; contentHash: string }): Promise<TransactionInstruction[]> {
-      if (!/^[0-9a-f]{64}$/.test(ref.contentHash)) throw new Error('contentHash must be 64 lowercase hex characters.');
+    /**
+     * Seller publishes a sale. `amount` in USDC base units.
+     * Digital: `contentHash` is the file's SHA-256 in hex. In-person (`kind: 'physical'`):
+     * no hash (the program requires all zeros; the meeting place is committed later).
+     */
+    async createOrder(
+      ref: OrderRef & { amount: number | bigint; kind?: 'digital' | 'physical'; contentHash?: string | null },
+    ): Promise<TransactionInstruction[]> {
+      const physical = ref.kind === 'physical';
+      let hash = new Array<number>(32).fill(0);
+      if (!physical) {
+        if (!ref.contentHash || !/^[0-9a-f]{64}$/.test(ref.contentHash)) throw new Error('contentHash must be 64 lowercase hex characters.');
+        hash = [...Buffer.from(ref.contentHash, 'hex')];
+      }
       const ix = await program.methods
-        .createOrder(dealIdToBN(ref.dealId), new BN(ref.amount.toString()), { digital: {} }, [...Buffer.from(ref.contentHash, 'hex')])
+        .createOrder(dealIdToBN(ref.dealId), new BN(ref.amount.toString()), physical ? { physical: {} } : { digital: {} }, hash)
         .accountsStrict({
           payer: feePayer,
           seller: toPublicKey(ref.seller),
@@ -109,13 +120,13 @@ export function createBuilders(program: EscrowProgram, mint: PublicKey, feePayer
       return [ensureTokenAccount(ref.buyer), ix];
     },
 
-    /** Anyone, after the claim deadline: refund to the order's `buyer`. */
+    /** Anyone, after the claim deadline (digital) or meeting + grace (in-person): refund to the order's `buyer`. */
     async refundAfterDeadline(ref: OrderRef & { buyer: Address; caller: Address }): Promise<TransactionInstruction[]> {
       const ix = await program.methods.refundAfterDeadline().accountsStrict(refundAccounts(ref, ref.caller, ref.buyer)).instruction();
       return [ensureTokenAccount(ref.buyer), ix];
     },
 
-    /** Buyer presses "Recibí el archivo": pay the seller. */
+    /** Buyer presses "Recibí el archivo" / "Recibí el producto": pay the seller. */
     async confirmHandover(ref: OrderRef & { buyer: Address }): Promise<TransactionInstruction[]> {
       const ix = await program.methods.confirmHandover().accountsStrict(releaseAccounts(ref, ref.buyer)).instruction();
       return [ensureTokenAccount(ref.seller), ix];
@@ -125,6 +136,55 @@ export function createBuilders(program: EscrowProgram, mint: PublicKey, feePayer
     async releaseAfterDeadline(ref: OrderRef & { caller: Address }): Promise<TransactionInstruction[]> {
       const ix = await program.methods.releaseAfterDeadline().accountsStrict(releaseAccounts(ref, ref.caller)).instruction();
       return [ensureTokenAccount(ref.seller), ix];
+    },
+
+    // --- In-person ----------------------------------------------------------------
+
+    /**
+     * Buyer pays and proposes the meeting. `meetingTime` in unix seconds; `placeHash` is
+     * the SHA-256 (hex) of the meeting place text, which stays off-chain.
+     */
+    async fundAndSchedule(ref: OrderRef & { buyer: Address; meetingTime: number; placeHash: string }): Promise<TransactionInstruction[]> {
+      if (!/^[0-9a-f]{64}$/.test(ref.placeHash)) throw new Error('placeHash must be 64 lowercase hex characters.');
+      const buyer = toPublicKey(ref.buyer);
+      const ix = await program.methods
+        .fundAndSchedule(new BN(ref.meetingTime), [...Buffer.from(ref.placeHash, 'hex')])
+        .accountsStrict({ buyer, config, ...orderAccounts(ref), mint, buyerToken: userTokenAddress(buyer, mint), tokenProgram })
+        .instruction();
+      return [ensureTokenAccount(buyer), ix];
+    },
+
+    /** Seller accepts the proposed meeting. */
+    async acceptMeeting(ref: OrderRef): Promise<TransactionInstruction[]> {
+      const ix = await program.methods
+        .acceptMeeting()
+        .accountsStrict({ seller: toPublicKey(ref.seller), config, order: orderAccounts(ref).order })
+        .instruction();
+      return [ix];
+    },
+
+    /** Seller declines the proposed meeting: refund to the buyer. */
+    async declineMeeting(ref: OrderRef & { buyer: Address }): Promise<TransactionInstruction[]> {
+      const ix = await program.methods.declineMeeting().accountsStrict(refundAccounts(ref, ref.seller, ref.buyer)).instruction();
+      return [ensureTokenAccount(ref.buyer), ix];
+    },
+
+    /** Anyone, once the seller's accept window is over: refund to the order's `buyer`. */
+    async refundUnaccepted(ref: OrderRef & { buyer: Address; caller: Address }): Promise<TransactionInstruction[]> {
+      const ix = await program.methods.refundUnaccepted().accountsStrict(refundAccounts(ref, ref.caller, ref.buyer)).instruction();
+      return [ensureTokenAccount(ref.buyer), ix];
+    },
+
+    /** Buyer rejects the item at the meeting (from 30 min before): refund. */
+    async rejectAtMeeting(ref: OrderRef & { buyer: Address }): Promise<TransactionInstruction[]> {
+      const ix = await program.methods.rejectAtMeeting().accountsStrict(refundAccounts(ref, ref.buyer, ref.buyer)).instruction();
+      return [ensureTokenAccount(ref.buyer), ix];
+    },
+
+    /** Seller cancels after accepting: refund to the buyer. */
+    async sellerCancel(ref: OrderRef & { buyer: Address }): Promise<TransactionInstruction[]> {
+      const ix = await program.methods.sellerCancel().accountsStrict(refundAccounts(ref, ref.seller, ref.buyer)).instruction();
+      return [ensureTokenAccount(ref.buyer), ix];
     },
 
     /** One-time setup, signed by the program's upgrade authority. */
