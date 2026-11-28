@@ -59,7 +59,9 @@ export type EscrowErrorCode =
   | 'NotBuyer'
   | 'ClaimWindowClosed'
   | 'DeadlineNotReached'
-  | 'PhysicalNotSupported';
+  | 'PhysicalNotSupported'
+  // Not a program error: the buyer's test USDC balance is below the price (chain mode).
+  | 'InsufficientFunds';
 
 export class EscrowError extends Error {
   constructor(

@@ -22,7 +22,9 @@ export async function POST(request: Request, { params }: RouteContext<'/api/deal
   if (!viewer) return error(401, 'Unauthorized', 'Entra para descargar tu archivo.');
 
   try {
-    const [deal, order] = await Promise.all([getDeal(dealId), getOrder(dealId)]);
+    // Deal first: in chain mode the order's address is derived from its seller.
+    const deal = await getDeal(dealId);
+    const order = deal ? await getOrder(dealId, deal.seller) : null;
     if (!deal || deal.kind !== 'digital' || !deal.file_path || !deal.file_name) {
       return error(404, 'NotFound', 'No encontramos esta venta.');
     }

@@ -1,26 +1,19 @@
 'use server';
 
-// Server half of the mock wallet: creates a test user and signs its session token.
+// Server half of the mock wallet: creates a test user with a real Devnet keypair and
+// signs its session token.
+//
+// The keypair is real so chain mode can be tested end to end before Privy: the browser
+// signs transactions with it, like an embedded wallet would. It is a throwaway Devnet
+// test key that lives only in this user's browser. Disabled when WALLET_MODE=privy.
+import { Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
 import { signMockToken } from '../auth/mock-token';
 import { walletMode } from '../auth/server';
 
-export async function startMockSession(): Promise<{ address: string; token: string }> {
+export async function startMockSession(): Promise<{ address: string; secretKey: string; token: string }> {
   if (walletMode() !== 'mock') throw new Error('Mock login is disabled.');
-  const address = randomAddress();
-  return { address, token: signMockToken(address) };
-}
-
-/** A random 32-byte key encoded in base58, shaped like a real Solana address. */
-function randomAddress(): string {
-  const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  let n = 0n;
-  for (const b of bytes) n = (n << 8n) | BigInt(b);
-  let out = '';
-  while (n > 0n) {
-    out = alphabet[Number(n % 58n)] + out;
-    n /= 58n;
-  }
-  return out.padStart(32, '1');
+  const keypair = Keypair.generate();
+  const address = keypair.publicKey.toBase58();
+  return { address, secretKey: bs58.encode(keypair.secretKey), token: signMockToken(address) };
 }

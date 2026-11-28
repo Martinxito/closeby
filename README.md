@@ -40,7 +40,7 @@ The browser never talks to the database. Only the Next.js server reads and write
 | --- | --- |
 | `SUPABASE_URL` | Project URL (`https://<project-id>.supabase.co`) |
 | `SUPABASE_SECRET_KEY` | Secret key (`sb_secret_...`). Server-only: never prefix it with `NEXT_PUBLIC_`. |
-| `ESCROW_MODE`, `NEXT_PUBLIC_ESCROW_MODE` | `mock` until the Solana program is on Devnet, then `chain`. Same value in both. |
+| `ESCROW_MODE`, `NEXT_PUBLIC_ESCROW_MODE` | `chain` to use the program on Devnet (`solana/`), `mock` for the Supabase stand-in. Same value in both. In chain mode `USDC_MINT` and `FEE_PAYER_SECRET_KEY` must be the ones the program's config was initialized with (see `docs/program-plan.md`, deployment record). |
 | `WALLET_MODE` | `mock` (test users) until Privy is wired in, then `privy`. |
 | `MOCK_AUTH_SECRET` | Optional. Signs mock session tokens; defaults to a secret derived from `SUPABASE_SECRET_KEY`. |
 | `SOLANA_RPC_URL`, `FEE_PAYER_SECRET_KEY`, `USDC_MINT` | Devnet RPC, our fee payer and the test USDC mint. Created by the setup script below. Server-only. |
