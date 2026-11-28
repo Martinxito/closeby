@@ -173,7 +173,8 @@ pnpm --filter @closeby/web dev                  # http://localhost:3000
 | `SOLANA_RPC_URL` | `https://api.devnet.solana.com` |
 | `USDC_MINT` | The mint the program's config was initialized with (table above) |
 | `FEE_PAYER_SECRET_KEY` | Base58 secret key of the fee payer. Must be that mint's authority |
-| `WALLET_MODE` | `mock` (default): test users with a Devnet keypair kept in the browser. `privy` once the provider is wired in |
+| `WALLET_MODE`, `NEXT_PUBLIC_WALLET_MODE` | `privy`: email or Google login with a Privy Solana embedded wallet. `mock` (default): test users with a Devnet keypair kept in the browser. Same value in both |
+| `NEXT_PUBLIC_PRIVY_APP_ID`, `PRIVY_APP_SECRET` | Privy app ID (public) and secret (server-only), for `privy` mode |
 | `MOCK_AUTH_SECRET`, `RELAY_TICKET_SECRET` | Optional; derived from the Supabase key and the fee payer by default |
 
 To create your own fee payer and test mint instead, run `pnpm --filter @closeby/web setup:devnet`. It writes them to `.env.local`; if the airdrop is refused, fund the printed address at https://faucet.solana.com. A new mint needs its own program deployment and `init_config`, because the config is locked to one mint.

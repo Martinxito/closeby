@@ -6,6 +6,7 @@ packages:
 # esbuild (used by tsx in solana/) ships its binary as an optional dependency, so none of
 # their install scripts need to run.
 allowBuilds:
+  '@reown/appkit': false
   bigint-buffer: false
   bufferutil: false
   esbuild: false
