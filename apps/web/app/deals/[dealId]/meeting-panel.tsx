@@ -14,7 +14,7 @@ import { sendEscrowAction } from '@/lib/escrow/client';
 import { availableActions } from '@/lib/escrow/rules';
 import { EscrowError, type EscrowErrorCode, type Order, type SimpleActionType } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
-import { fetchMeetingPlace, placeHash, saveMeetingPlace } from '@/lib/meeting';
+import { fetchMeetingPlace, forgetPendingPlace, placeHash, rememberPendingPlace, saveMeetingPlace, savePendingPlace } from '@/lib/meeting';
 import { MEETING_POINTS, mapsUrl } from '@/lib/meeting-points';
 import { UserError, friendlyMessage } from '@/lib/user-error';
 import { useWallet } from '@/lib/wallet';
@@ -43,6 +43,8 @@ export function MeetingPanel({ dealId, priceClp, order, communes, availability }
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [venue, setVenue] = useState<string | null>(null);
+  // True once we know the server has no place for this order (see savePendingPlace).
+  const [placeMissing, setPlaceMissing] = useState(false);
 
   const me = wallet.address;
   const isSeller = me !== null && me === order?.seller;
@@ -53,10 +55,20 @@ export function MeetingPanel({ dealId, priceClp, order, communes, availability }
   // The exact place: only for the two parties, once the buyer proposed it.
   useEffect(() => {
     if (!isParty || !placeKey) return;
-    fetchMeetingPlace(dealId, wallet)
-      .then(setVenue)
-      .catch(() => setVenue(null));
-  }, [isParty, placeKey, dealId, wallet]);
+    let cancelled = false;
+    (async () => {
+      let place = await fetchMeetingPlace(dealId, wallet).catch(() => null);
+      // Paid, but the place never reached our server (e.g. the connection dropped right
+      // after paying): the buyer's browser still has it, so save it now.
+      if (!place && isBuyer) place = await savePendingPlace(dealId, placeKey, wallet).catch(() => null);
+      if (cancelled) return;
+      setVenue(place);
+      setPlaceMissing(!place);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isParty, isBuyer, placeKey, dealId, wallet]);
 
   if (!wallet.ready) return <p className="muted" aria-live="polite">Cargando…</p>;
   if (!order) return <p className="muted">Esta venta todavía no está lista. Recarga en unos segundos.</p>;
@@ -80,22 +92,51 @@ export function MeetingPanel({ dealId, priceClp, order, communes, availability }
   async function propose(meetingTime: number, place: string) {
     setBusy('fund_and_schedule');
     setError(null);
+    let paid = false;
     try {
       const hash = await placeHash(place);
+      // Kept in this browser until our server has it, in case step 2 fails.
+      rememberPendingPlace(dealId, place);
       // 1. Pay and commit to time + place (only the hash goes on-chain).
       await sendEscrowAction({ type: 'fund_and_schedule', dealId, meetingTime, placeHash: hash }, wallet);
+      paid = true;
       // 2. Save the place itself off-chain; the server checks it matches the hash.
       await saveMeetingPlace(dealId, place, wallet);
+      forgetPendingPlace(dealId);
       setVenue(place.trim());
+      setPlaceMissing(false);
     } catch (err) {
-      setError(err instanceof EscrowError ? (ERRORS[err.code] ?? 'No pudimos reservar. Intenta de nuevo.') : friendlyMessage(err));
+      if (paid) {
+        // The money is reserved: say so, and offer to retry saving the place.
+        setPlaceMissing(true);
+        setError('Tu plata quedó reservada, pero no pudimos guardar el lugar del encuentro. Toca «Guardar el lugar» para intentarlo de nuevo.');
+      } else {
+        setError(err instanceof EscrowError ? (ERRORS[err.code] ?? 'No pudimos reservar. Intenta de nuevo.') : friendlyMessage(err));
+      }
     } finally {
       setBusy(null);
       router.refresh();
     }
   }
 
+  async function retrySavePlace() {
+    if (!placeKey) return;
+    setBusy('save_place');
+    setError(null);
+    try {
+      const saved = await savePendingPlace(dealId, placeKey, wallet);
+      if (!saved) throw new UserError('No encontramos el lugar en este dispositivo. Coordínalo con el vendedor.');
+      setVenue(saved);
+      setPlaceMissing(false);
+    } catch (err) {
+      setError(friendlyMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const when = order.meetingTime ? formatWhen(order.meetingTime) : null;
+  const meetingOpen = order.status === 'Funded' || order.status === 'Scheduled';
 
   return (
     <section className="card stack" aria-live="polite">
@@ -117,6 +158,16 @@ export function MeetingPanel({ dealId, priceClp, order, communes, availability }
           )}
         </div>
       )}
+
+      {/* Paid, but the place did not reach our server */}
+      {isParty && meetingOpen && placeMissing &&
+        (isBuyer ? (
+          <button type="button" className="button" disabled={busy !== null} onClick={retrySavePlace}>
+            {busy === 'save_place' ? 'Guardando…' : 'Guardar el lugar'}
+          </button>
+        ) : (
+          <p className="muted">El comprador todavía no termina de guardar el lugar del encuentro.</p>
+        ))}
 
       {error && (
         <p className="error" role="alert">
