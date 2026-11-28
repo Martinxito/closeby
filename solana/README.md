@@ -21,7 +21,7 @@ create_order ─► Created ─fund─► Funded ─open_delivery─► Delivere
 | [`src/rules.rs`](programs/closeby_escrow/src/rules.rs) | Checks and the vault payout shared by several instructions |
 | [`src/state.rs`](programs/closeby_escrow/src/state.rs) | `Config` and `Order` accounts, `OrderKind`, `OrderStatus` |
 | [`src/errors.rs`](programs/closeby_escrow/src/errors.rs), [`src/events.rs`](programs/closeby_escrow/src/events.rs) | Custom errors (same names the web uses) and one event per state change |
-| [`tests/`](tests) | 27 program tests and the client tests, on a local validator |
+| [`tests/`](tests) | 48 tests on a local validator: 27 digital, 17 in-person (`in_person.ts`), 4 for the client |
 | [`client/`](client) | TypeScript client the web uses: addresses, instruction builders, order reads, error names |
 | [`idl/`](idl) | Generated IDL (`closeby_escrow.json`, `.ts`) |
 | [`scripts/`](scripts) | `init-config.mjs` (one-time setup) and `smoke-devnet.ts` (full flow on Devnet) |

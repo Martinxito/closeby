@@ -40,7 +40,7 @@ Anchor CLI **1.2.2**, Solana CLI **3.1.10** (chosen by `avm` for Anchor 1.2.2), 
 ```sh
 pnpm install                 # from the repo root, once
 pnpm --filter @closeby/solana build    # anchor build --arch v0
-pnpm --filter @closeby/solana test     # 27 tests on solana-test-validator
+pnpm --filter @closeby/solana test     # 48 tests (27 digital, 17 in-person, 4 client) on solana-test-validator
 ```
 
 Two things that bite:
@@ -145,6 +145,7 @@ Fill in after step 6 and 7:
 | Test USDC mint | `9REWY6ZAJbt6UaH1nLetb6i7tApvLWzr9m3TSo5ZCnkz` (6 decimals; authority = web fee payer `DhuJTzRRuLLHdHt5BsreqvZR9i8qiskVktprDsUF64BA`) |
 | `digital_claim_secs` / `digital_review_secs` | 600 / 300 |
 | Deploy transaction | `TWcRsxwuWaLiXqcMMuSej1ZpejzpHSndLL8CddNfmWhJPTgewwpDKg9qgqFGv3LYBVvCP4rEQc2mDiBvCi1qtVi` |
+| Upgrade (in-person orders, PR #21, Sat 11:30) | `5kvykfoJ4ehG2aRHBLynWpS1NCoiiGx17qDJ2CcmnBnQL1GQrrwv6vDqQ5pEMK383DwPGyoY6c8ZkCeF8pJh5QHp` (slot 527259859; extended by 16384 bytes first; on-chain binary SHA-256 matches `anchor build --arch v0`; digital smoke test passed after it) |
 | Upgrade (modular version, Sat 02:30) | `rbHYoJmM6a5XRxMXbuGdLfNkvpLAKhmYcLs8rp9uwfJm9dNgt3K8u2zzsY6YspS8dqzn2UrDHAPHdvJkpUN1UHt` (slot 527210822; on-chain binary SHA-256 matches `anchor build --arch v0`) |
 | Upgrade authority | `J2m4KAUHetgikUpGYgGVtDw7tuhKVXzgcouTycjJavix` |
 | ProgramData | `9xesLoZxwRJJfw8LnDc5Yd46acrnPZwad555prvnTjKB` |

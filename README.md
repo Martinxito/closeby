@@ -71,7 +71,7 @@ Source in [`solana/programs/closeby_escrow/src`](solana/programs/closeby_escrow/
 | `refund_after_deadline` | Anyone | `Funded`, claim deadline passed | Vault → buyer; `Refunded` |
 | `release_after_deadline` | Anyone | `Delivered`, review deadline passed | Vault → seller; `Released` |
 
-Every rule is a `require!` with a custom error (`NotBuyer`, `ClaimWindowClosed`, `DeadlineNotReached`, `WrongMint`, `WrongTokenAccount`…), every state change emits an event, token movements use checked transfers, and payout accounts are validated against the recorded buyer or seller. **27 tests** cover the happy path, both refunds, the review-window payout and every case that must fail, asserting that failed operations leave balances unchanged ([`solana/tests`](solana/tests)).
+Every rule is a `require!` with a custom error (`NotBuyer`, `ClaimWindowClosed`, `DeadlineNotReached`, `WrongMint`, `WrongTokenAccount`…), every state change emits an event, token movements use checked transfers, and payout accounts are validated against the recorded buyer or seller. **48 tests** (27 digital, 17 in-person, 4 for the web client) cover the happy paths, every refund, the review-window payout and every case that must fail, asserting that failed operations leave balances unchanged ([`solana/tests`](solana/tests)).
 
 ### Invisible wallet and fees paid by us
 
@@ -183,7 +183,7 @@ To create your own fee payer and test mint instead, run `pnpm --filter @closeby/
 
 ```sh
 pnpm --filter @closeby/solana build         # anchor build --arch v0
-pnpm --filter @closeby/solana test          # 27 tests on a local validator
+pnpm --filter @closeby/solana test          # 48 tests on a local validator
 pnpm --filter @closeby/solana smoke:devnet  # create → fund → unlock → confirm on Devnet, users without SOL
 ```
 
