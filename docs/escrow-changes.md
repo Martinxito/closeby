@@ -1,7 +1,12 @@
 # Escrow program: changes for digital goods
 
 **For:** program owners (Alex, Aaron). **From:** web team. **Date:** 27 Nov 2026, 20:00.
-**Status:** proposal. Reply with ✅ or changes; once agreed, the web codes against these names.
+**Status:** ✅ **Accepted by Aaron, Sat 28 Nov 2026, 00:45.** Names, accounts and PDA seeds stay exactly as written below. Two clarifications from the program side:
+
+1. **First deploy covers digital orders only:** `init_config`, `create_order`, `fund`, `open_delivery`, `buyer_cancel`, `confirm_handover`, `refund_after_deadline`, `release_after_deadline`. Physical-only instructions are decided at the Saturday 13:00 sync. `create_order` still takes `kind`, so adding them later does not break the web.
+2. **The web creates the buyer's and seller's USDC token accounts** (associated token accounts) in the same transaction, with the idempotent ATA instruction, before the program instruction. The program only validates them (owner and mint); it does not create them.
+
+Plan and owners: [program-plan.md](program-plan.md).
 
 The original spec (in-person sales) is in the old `CLAUDE.md`, commit `7437880`. Everything there stays valid for in-person orders. This document lists what changes so the same program also handles **digital goods, which are now the primary demo flow** ([decisions/0002](decisions/0002-digital-goods-primary.md)).
 

@@ -1,5 +1,6 @@
 packages:
   - 'apps/*'
+  - 'solana'
 
 # Optional native speed-ups pulled in by @solana/web3.js. They fall back to pure
 # JavaScript, so their install scripts are not allowed to run.

@@ -7,8 +7,9 @@ Start here. This folder is the shared memory of the project: product rules, deci
 1. [product.md](product.md): what Closeby is, who it is for, and the UX rules.
 2. [flows/digital-sale.md](flows/digital-sale.md): the primary demo flow (digital goods), step by step, with every rule.
 3. [escrow-changes.md](escrow-changes.md): what the Solana program must support. Shared contract between web and program.
-4. [plan.md](plan.md): blocks, owners and checkpoints until submission.
+4. [plan.md](plan.md): blocks, owners and checkpoints until submission. The program's own step-by-step plan is [program-plan.md](program-plan.md).
 5. [decisions/](decisions/): why things are the way they are. One file per decision.
+6. [in-person-proposal.md](in-person-proposal.md): proposal to add in-person sales (and services) to the same program, for the Saturday 13:00 sync.
 
 ## Decisions
 
