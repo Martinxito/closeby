@@ -1,5 +1,6 @@
 // Tests for the Closeby escrow program (docs/escrow-changes.md).
 // Setup, helpers and instruction builders live in ./support/testbed.ts.
+// Runs before escrow_client.ts (see Anchor.toml): it calls init_config.
 //
 // Run with `pnpm --filter @closeby/solana test`.
 
@@ -11,14 +12,14 @@ import {
   PRICE,
   REVIEW_SECS,
   WAIT_PAST_WINDOW_MS,
-  Testbed,
+  testbed,
   expectFailure,
   randomOrderId,
   sleep,
 } from './support/testbed';
 
 describe('closeby_escrow', () => {
-  const t = new Testbed();
+  const t = testbed;
   const { admin, buyer, seller, stranger, feePayer, connection } = t;
   const { send, expectError, balance, fetchOrder, fetchConfig, orderAddresses } = t;
   const { initConfigTx, createOrderTx, fundTx, openTx, cancelTx, refundTx, confirmTx, releaseTx } = t;

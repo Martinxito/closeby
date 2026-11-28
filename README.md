@@ -6,7 +6,7 @@ Sell files (and in-person goods) with protected payment: the buyer pays into esc
 | --- | --- |
 | `apps/web` | Primary mobile-first Next.js application |
 | `apps/api` | Deal metadata API (planned) |
-| `solana` | [Proposed Devnet escrow interface and verification plan](solana/README.md) (in-person; digital changes in [docs/escrow-changes.md](docs/escrow-changes.md)) |
+| `solana` | Escrow program (Anchor), its tests and the web client (`solana/client/`). See [Escrow program](#escrow-program-solana); original in-person design in [solana/README.md](solana/README.md) |
 | `supabase` | Off-chain deal metadata schema (Supabase migrations) |
 | `docs` | Product rules, flows, plan and decisions ([start here](docs/README.md)) |
 
@@ -60,6 +60,18 @@ pnpm --filter @closeby/web setup:devnet
 ```
 
 If the airdrop is refused, send Devnet SOL to the printed fee payer address at https://faucet.solana.com and run it again. Then copy the three Solana variables to Vercel.
+
+## Escrow program (Solana)
+
+The Anchor program, its tests and the TypeScript client the web uses live in [`solana/`](solana/). Deployed on Devnet as `4vaVcMbVh5czXPMw3w6FCp8AFjNNuVtaquppq6ZEzugT`; addresses, toolchain and how to connect the web are in [docs/program-plan.md](docs/program-plan.md).
+
+Requires Anchor CLI 1.2.2 and Solana CLI 3.1.10.
+
+```sh
+pnpm --filter @closeby/solana build         # anchor build --arch v0
+pnpm --filter @closeby/solana test          # program and client tests on a local validator
+pnpm --filter @closeby/solana smoke:devnet  # full digital flow on Devnet; reads apps/web/.env.local
+```
 
 ## Escrow mock
 
