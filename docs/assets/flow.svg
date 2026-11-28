@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" width="1100" height="560" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title>How a Closeby digital sale works</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c203b"/>
+    </marker>
+    <marker id="arrow-refund" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b45309"/>
+    </marker>
+    <marker id="arrow-release" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#15803d"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="560" rx="16" fill="#ffffff"/>
+  <text x="40" y="44" font-size="24" font-weight="700" fill="#1c203b">How a Closeby digital sale works</text>
+  <text x="40" y="70" font-size="15" fill="#505875">Every box is the order's status in the Solana program. Every arrow is one instruction, signed by the person named on it.</text>
+
+  <!-- Step 0: publish -->
+  <text x="40" y="104" font-size="14" font-weight="700" fill="#4d47a7">0 · SELLER PUBLISHES</text>
+  <text x="40" y="122" font-size="13" fill="#1c203b">create_order(price, SHA-256 of the file)</text>
+  <text x="40" y="138" font-size="13" fill="#505875">file stays in private storage</text>
+
+  <!-- States -->
+  <g font-size="18" font-weight="700" text-anchor="middle">
+    <rect x="40" y="180" width="190" height="70" rx="14" fill="#eef0ff" stroke="#4d47a7" stroke-width="2"/>
+    <text x="135" y="222" fill="#1c203b">Created</text>
+
+    <rect x="320" y="180" width="190" height="70" rx="14" fill="#eef0ff" stroke="#4d47a7" stroke-width="2"/>
+    <text x="415" y="212" fill="#1c203b">Funded</text>
+    <text x="415" y="234" font-size="13" font-weight="400" fill="#505875">money in the vault</text>
+
+    <rect x="600" y="180" width="190" height="70" rx="14" fill="#eef0ff" stroke="#4d47a7" stroke-width="2"/>
+    <text x="695" y="212" fill="#1c203b">Delivered</text>
+    <text x="695" y="234" font-size="13" font-weight="400" fill="#505875">buyer has the file</text>
+
+    <rect x="880" y="180" width="180" height="70" rx="14" fill="#e7f6ec" stroke="#15803d" stroke-width="2"/>
+    <text x="970" y="212" fill="#14532d">Released</text>
+    <text x="970" y="234" font-size="13" font-weight="400" fill="#15803d">seller is paid</text>
+
+    <rect x="320" y="400" width="190" height="70" rx="14" fill="#fff4e5" stroke="#b45309" stroke-width="2"/>
+    <text x="415" y="432" fill="#7c2d12">Refunded</text>
+    <text x="415" y="454" font-size="13" font-weight="400" fill="#b45309">buyer gets it all back</text>
+  </g>
+
+  <!-- Happy path -->
+  <line x1="230" y1="215" x2="316" y2="215" stroke="#1c203b" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="273" y="160" font-size="14" font-weight="700" fill="#4d47a7" text-anchor="middle">1 · BUYER PAYS</text>
+  <text x="273" y="178" font-size="13" fill="#1c203b" text-anchor="middle">fund</text>
+
+  <line x1="510" y1="215" x2="596" y2="215" stroke="#1c203b" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="555" y="142" font-size="14" font-weight="700" fill="#4d47a7" text-anchor="middle">2 · BUYER UNLOCKS</text>
+  <text x="555" y="160" font-size="13" fill="#1c203b" text-anchor="middle">open_delivery</text>
+  <text x="555" y="176" font-size="12" fill="#505875" text-anchor="middle">point of no return</text>
+
+  <line x1="790" y1="215" x2="876" y2="215" stroke="#15803d" stroke-width="2.5" marker-end="url(#arrow-release)"/>
+  <text x="835" y="142" font-size="14" font-weight="700" fill="#15803d" text-anchor="middle">3 · ONE BUTTON</text>
+  <text x="835" y="160" font-size="13" fill="#1c203b" text-anchor="middle">confirm_handover</text>
+  <text x="835" y="176" font-size="12" fill="#505875" text-anchor="middle">"Recibí el archivo"</text>
+
+  <!-- Download link note -->
+  <text x="680" y="276" font-size="12" fill="#505875" text-anchor="middle">server hands the buyer a</text>
+  <text x="680" y="292" font-size="12" fill="#505875" text-anchor="middle">5-minute download link</text>
+
+  <!-- Refund paths from Funded -->
+  <line x1="390" y1="250" x2="390" y2="396" stroke="#b45309" stroke-width="2.5" marker-end="url(#arrow-refund)"/>
+  <text x="380" y="300" font-size="13" font-weight="700" fill="#b45309" text-anchor="end">buyer_cancel</text>
+  <text x="380" y="317" font-size="12" fill="#505875" text-anchor="end">buyer changes their mind</text>
+  <text x="380" y="333" font-size="12" fill="#505875" text-anchor="end">before unlocking</text>
+
+  <line x1="440" y1="250" x2="440" y2="396" stroke="#b45309" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arrow-refund)"/>
+  <text x="452" y="300" font-size="13" font-weight="700" fill="#b45309">refund_after_deadline</text>
+  <text x="452" y="317" font-size="12" fill="#505875">not unlocked within 10 min;</text>
+  <text x="452" y="333" font-size="12" fill="#505875">anyone can trigger it</text>
+
+  <!-- Release after review window -->
+  <path d="M 775 250 Q 775 340 870 340 L 960 340 Q 990 340 990 254" fill="none" stroke="#15803d" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arrow-release)"/>
+  <text x="875" y="364" font-size="13" font-weight="700" fill="#15803d" text-anchor="middle">release_after_deadline</text>
+  <text x="875" y="381" font-size="12" fill="#505875" text-anchor="middle">unlocked but silent for 5 min;</text>
+  <text x="875" y="397" font-size="12" fill="#505875" text-anchor="middle">anyone can trigger it</text>
+
+  <!-- Guarantees -->
+  <rect x="40" y="490" width="1020" height="50" rx="12" fill="#f7f8fd" stroke="#d7dbef"/>
+  <text x="60" y="511" font-size="13" fill="#1c203b"><tspan font-weight="700">Money is never stuck and never goes to the caller:</tspan> the vault (owned by the order PDA) pays only the recorded buyer or seller.</text>
+  <text x="60" y="530" font-size="13" fill="#1c203b">Users never hold SOL: Closeby's server pays every fee and rent, and only co-signs transactions it built itself.</text>
+</svg>
