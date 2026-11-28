@@ -71,11 +71,13 @@ function Preview({ url, type, title }: { url: string | null; type: PreviewType; 
   if (!url) return <p className="muted">El vendedor no agregó una vista previa.</p>;
   switch (type) {
     case 'image':
-      return <img className="preview-media" src={url} alt={`Vista previa de ${title}`} />;
+      // The preview is public by design (the seller uploads only a sample). These attributes
+      // only remove the one-click download shortcuts; anything shown in a browser can be saved.
+      return <img className="preview-media" src={url} alt={`Vista previa de ${title}`} draggable={false} />;
     case 'audio':
-      return <audio className="preview-media" src={url} controls preload="metadata" />;
+      return <audio className="preview-media" src={url} controls controlsList="nodownload" preload="metadata" />;
     case 'video':
-      return <video className="preview-media" src={url} controls preload="metadata" playsInline />;
+      return <video className="preview-media" src={url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture preload="metadata" playsInline />;
     case 'pdf':
       return (
         <a className="button" href={url} target="_blank" rel="noreferrer">

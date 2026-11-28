@@ -43,3 +43,4 @@ Show pending, confirmed and failed states distinctly. Never show "paid" from a w
 - Save a deal only if the on-chain order exists, `seller` matches and `content_hash` equals the SHA-256 of the stored file.
 - Hand out a download URL (`POST /api/deals/[dealId]/download`) only if the on-chain order is `Delivered` or `Released` and the logged-in user's wallet is the order's `buyer`. URLs expire in minutes.
 - The file is never in a public bucket and never in the client bundle.
+- The preview **is** public (anyone can see and save it before paying). The seller is told to upload only a sample, and a preview identical to the file (same SHA-256) is deleted and the sale refused. Audio/video players hide the download button; that is only a deterrent.

@@ -49,17 +49,24 @@ export function SellForm() {
     setError(null);
 
     try {
-      // 1. Deal ID and one-time upload links.
+      // 0. The preview is public, so it must not be the file being sold. The server checks
+      //    this again after upload; checking here first avoids a useless upload.
       setStep('uploading');
+      const contentHashPromise = sha256Hex(file);
+      if (preview && (await sha256Hex(preview)) === (await contentHashPromise)) {
+        throw new Error('La vista previa no puede ser el archivo completo: cualquiera podría descargarlo sin pagar. Sube solo una muestra.');
+      }
+
+      // 1. Deal ID and one-time upload links.
       const prepared = await prepareSale({
         file: { name: file.name, size: file.size },
         preview: preview ? { name: preview.name, size: preview.size, type: preview.type } : null,
       });
       if (!prepared.ok) throw new Error(prepared.error);
 
-      // 2. Upload straight to storage while hashing the file locally.
+      // 2. Upload straight to storage (the file's hash is already being computed above).
       const [contentHash] = await Promise.all([
-        sha256Hex(file),
+        contentHashPromise,
         upload(prepared.file.uploadUrl, file),
         preview && prepared.preview ? upload(prepared.preview.uploadUrl, preview) : null,
       ]);
@@ -135,7 +142,10 @@ export function SellForm() {
           onChange={(e) => setPreview(e.target.files?.[0] ?? null)}
           disabled={busy}
         />
-        <small>Una muestra para que el comprador sepa qué compra: imagen con marca de agua, trozo de audio, primera página.</small>
+        <small>
+          <strong>Cualquiera puede ver y descargar la vista previa.</strong> Sube solo una muestra: un trozo del audio, la imagen
+          con marca de agua o la primera página. Nunca el archivo completo.
+        </small>
       </label>
 
       {error && (
