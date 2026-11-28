@@ -1,0 +1,8 @@
+target/
+.anchor/
+test-ledger/
+node_modules/
+# Keypairs: never commit them (the program keypair lives in target/deploy, already ignored).
+*-keypair.json
+id.json
+.surfpool/

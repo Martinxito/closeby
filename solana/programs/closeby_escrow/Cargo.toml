@@ -1,0 +1,25 @@
+[package]
+name = "closeby_escrow"
+version = "0.1.0"
+description = "Closeby escrow: protected payments for digital goods on Solana"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "closeby_escrow"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+custom-heap = []
+custom-panic = []
+anchor-debug = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+# Versions are pinned to the installed Anchor CLI (check with `anchor --version`).
+[dependencies]
+anchor-lang = "1.2.2"
+anchor-spl = { version = "1.2.2", features = ["token", "token_2022", "associated_token"] }
