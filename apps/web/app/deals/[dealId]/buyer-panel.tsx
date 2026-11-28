@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { downloadPurchasedFile } from '@/lib/downloads';
 import { sendEscrowAction } from '@/lib/escrow/client';
 import { availableActions, canDownload } from '@/lib/escrow/rules';
-import { EscrowError, type EscrowActionType, type EscrowErrorCode, type Order } from '@/lib/escrow/types';
+import { EscrowError, type EscrowActionType, type EscrowErrorCode, type Order, type SimpleActionType } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
 import { useWallet } from '@/lib/wallet';
 import { friendlyMessage } from '@/lib/user-error';
@@ -47,7 +47,7 @@ export function BuyerPanel({ dealId, priceClp, order }: Props) {
   const actions = new Set(availableActions(order, me, now));
   const price = formatClp(priceClp);
 
-  async function run(type: Exclude<EscrowActionType, 'create_order'>) {
+  async function run(type: SimpleActionType) {
     setBusy(type);
     setError(null);
     try {

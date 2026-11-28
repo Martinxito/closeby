@@ -1,6 +1,6 @@
 # Proposal: in-person sales (and services) on the same program
 
-**Status:** proposal for the Saturday 13:00 sync. **Program owner if approved:** Alex.
+**Status:** approved Sat 28 Nov, 10:50 (option B, minimal: no reschedule, no late-cancel fee). Program in branch `feat/escrow-in-person` (needs `anchor build`/`anchor test` and a Devnet upgrade); web in `feat/web-in-person` (works on the mock today). **Program owner:** Alex/Aaron.
 **Based on:** the original in-person spec (old `CLAUDE.md`, commit `7437880`) and [solana/README.md](../solana/README.md), adapted to the program as deployed ([program-plan.md](program-plan.md)).
 
 ## What it adds

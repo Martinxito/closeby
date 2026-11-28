@@ -23,7 +23,7 @@ export default async function SharePage({ params }: PageProps<'/vender/[dealId]'
   const deal = await getDeal(dealId);
   const order = deal ? await getOrder(dealId, deal.seller) : null;
   if (!deal) notFound();
-  const status = sellerStatus(order, deal.price_clp);
+  const status = order?.kind === 'physical' ? physicalSellerStatus(order, deal.price_clp) : sellerStatus(order, deal.price_clp);
   const finished = order?.status === 'Released' || order?.status === 'Refunded';
 
   const url = `${await origin()}/deals/${dealId}`;
@@ -52,7 +52,13 @@ export default async function SharePage({ params }: PageProps<'/vender/[dealId]'
           <figure className="qr" aria-label="Código QR del link de tu venta" dangerouslySetInnerHTML={{ __html: qrSvg }} />
         )}
 
-        <Link href={`/deals/${dealId}`}>Ver cómo la ve el comprador</Link>
+        {order?.kind === 'physical' && order.status !== 'Created' ? (
+          <Link className="button button-primary" href={`/deals/${dealId}`}>
+            Ver el encuentro y responder <span aria-hidden="true">→</span>
+          </Link>
+        ) : (
+          <Link href={`/deals/${dealId}`}>Ver cómo la ve el comprador</Link>
+        )}
       </main>
     </>
   );
@@ -78,6 +84,28 @@ function sellerStatus(order: Order | null, priceClp: number): { title: string; d
       return { title: `✅ Te pagaron ${price}`, detail: 'Trato hecho.' };
     case 'Refunded':
       return { title: 'La compra se canceló', detail: 'Le devolvimos la plata al comprador antes de que recibiera el archivo.' };
+    default:
+      return { title: 'Preparando tu venta…', detail: 'Recarga en unos segundos.' };
+  }
+}
+
+/** In-person: what the seller sees (docs/in-person-proposal.md). Actions live on the deal page. */
+function physicalSellerStatus(order: Order, priceClp: number): { title: string; detail: string } {
+  const price = formatClp(priceClp);
+  switch (order.status) {
+    case 'Created':
+      return { title: 'Esperando que alguien reserve', detail: 'Comparte el link. El comprador propone día, hora y lugar, y paga al reservar.' };
+    case 'Funded':
+      return {
+        title: `Te reservaron ${price} para el ${formatDeadline(order.meetingTime)}`,
+        detail: `Acepta o rechaza el encuentro antes del ${formatDeadline(order.acceptDeadline)}. Si no respondes, se le devuelve la plata.`,
+      };
+    case 'Scheduled':
+      return { title: `Encuentro agendado: ${formatDeadline(order.meetingTime)}`, detail: `Lleva el producto. Te pagan ${price} cuando el comprador confirme.` };
+    case 'Released':
+      return { title: `✅ Te pagaron ${price}`, detail: 'Trato hecho.' };
+    case 'Refunded':
+      return { title: 'El trato se canceló', detail: 'La plata volvió al comprador.' };
     default:
       return { title: 'Preparando tu venta…', detail: 'Recarga en unos segundos.' };
   }

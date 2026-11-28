@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyAction, availableActions, canDownload } from './rules';
 import { EscrowError, type EscrowAction, type EscrowConfig, type Order } from './types';
 
-const config: EscrowConfig = { digitalClaimSecs: 600, digitalReviewSecs: 300 };
+const config: EscrowConfig = { digitalClaimSecs: 600, digitalReviewSecs: 300, acceptWindowSecs: 3600, graceSecs: 3600 };
 const SELLER = 'S'.repeat(44);
 const BUYER = 'B'.repeat(44);
 const STRANGER = 'X'.repeat(44);

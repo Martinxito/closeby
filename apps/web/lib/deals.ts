@@ -23,13 +23,15 @@ export type Deal = {
   created_at: string;
 };
 
-export type TimeSlot = { date: string; from: string; to: string };
+/** In-person: when the seller can meet, as they wrote it (e.g. "Sáb y dom, 10:00–18:00"). */
+export type TimeSlot = { label: string };
 
-/** What may be sent to the browser: everything except the private file path. */
-export type PublicDeal = Omit<Deal, 'file_path'>;
+/** What may be sent to the browser: everything except the private file path and the
+ * exact meeting place (only buyer and seller can read it, via /api/deals/[dealId]/meeting). */
+export type PublicDeal = Omit<Deal, 'file_path' | 'venue'>;
 
 export function toPublicDeal(deal: Deal): PublicDeal {
-  const { file_path: _private, ...rest } = deal;
+  const { file_path: _file, venue: _venue, ...rest } = deal;
   return rest;
 }
 
@@ -63,6 +65,31 @@ export type NewDigitalDeal = {
   file_type: string;
   preview_url: string | null;
 };
+
+export type NewPhysicalDeal = {
+  deal_id: string;
+  seller: string;
+  title: string;
+  description: string;
+  price_clp: number;
+  communes: string[];
+  time_slots: TimeSlot[];
+  photos: string[];
+  preview_url: string | null;
+};
+
+export async function insertPhysicalDeal(deal: NewPhysicalDeal): Promise<void> {
+  const { error } = await getSupabase()
+    .from('deals')
+    .insert({ ...deal, kind: 'physical' });
+  if (error) throw new Error(`Could not save deal ${deal.deal_id}: ${error.message}`);
+}
+
+/** Saves the meeting place. Callers must check its hash against the on-chain order first. */
+export async function saveVenue(dealId: string, venue: string): Promise<void> {
+  const { error } = await getSupabase().from('deals').update({ venue }).eq('deal_id', dealId).eq('kind', 'physical');
+  if (error) throw new Error(`Could not save the venue of ${dealId}: ${error.message}`);
+}
 
 export async function insertDigitalDeal(deal: NewDigitalDeal): Promise<void> {
   const { error } = await getSupabase()
