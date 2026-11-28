@@ -1351,6 +1351,9 @@ export type ClosebyEscrow = {
   "types": [
     {
       "name": "config",
+      "docs": [
+        "Program settings, set once by `init_config`."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
@@ -1402,6 +1405,9 @@ export type ClosebyEscrow = {
     },
     {
       "name": "order",
+      "docs": [
+        "One sale. Its vault is the associated USDC account of this PDA."
+      ],
       "type": {
         "kind": "struct",
         "fields": [

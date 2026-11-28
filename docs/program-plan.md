@@ -80,6 +80,17 @@ Never commit keypairs (`*.json` wallets, `.env*`), and never share Phantom's rec
 | 6 | README program section: program ID, mint, config values, instructions and rules, how to run the tests; flow diagram (Excalidraw screenshot) | Section merged before 20:00 |
 | 7 | Only if the 13:00 sync approves and time allows: physical instructions | Decided at 13:00 |
 
+## Web integration gaps (chain mode)
+
+Found by comparing `apps/web` with the program on Sat 28 Nov, 02:00. Owner: Martín, with Alex (his task 4).
+
+| # | Gap | Where | Fix |
+| --- | --- | --- | --- |
+| 1 | `getOrder(dealId)` cannot find an on-chain order: the PDA needs the seller too (`["order", seller, order_id LE]`) | `lib/escrow/server.ts`; callers in `app/vender/actions.ts` (order read before the deal row exists), `app/vender/[dealId]/page.tsx`, `app/deals/[dealId]/page.tsx`, `app/api/deals/[dealId]/download/route.ts` | Change to `getOrder(dealId, seller)`. In `publishSale` the seller comes from the session; elsewhere read the deal first, then the order |
+| 2 | "Ver comprobante" uses `order.lastSignature`, which the program cannot store (a program never knows its own transaction signature) | `app/deals/[dealId]/buyer-panel.tsx` | Use the signature returned by `submitSponsored`, or look it up with `getSignaturesForAddress(orderPda)` |
+| 3 | Buyer and seller USDC accounts must exist before `fund` and before payouts | Chain client in `lib/escrow` | Prepend `createAssociatedTokenAccountIdempotentInstruction` (paid by the fee payer), as agreed in escrow-changes.md |
+| 4 | `USDC_MINT` and `FEE_PAYER_SECRET_KEY` in Vercel must be the ones in the deployment record below (the config is locked to that mint) | Vercel env vars | Replace both together if another mint was set |
+
 ## Deployment record
 
 Fill in after step 6 and 7:

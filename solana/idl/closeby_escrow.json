@@ -1345,6 +1345,9 @@
   "types": [
     {
       "name": "Config",
+      "docs": [
+        "Program settings, set once by `init_config`."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
@@ -1396,6 +1399,9 @@
     },
     {
       "name": "Order",
+      "docs": [
+        "One sale. Its vault is the associated USDC account of this PDA."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
