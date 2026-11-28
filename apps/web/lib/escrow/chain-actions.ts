@@ -14,10 +14,11 @@ export async function instructionsFor(action: EscrowAction): Promise<Transaction
   const { dealId, signer } = action;
 
   if (action.type === 'create_order') {
-    if (action.kind !== 'digital') throw new EscrowError('PhysicalNotSupported', 'In-person orders are not implemented yet.');
-    if (!action.contentHash) throw new EscrowError('InvalidContentHash', 'A digital order needs the SHA-256 of its file.');
+    if (action.kind === 'digital' && !action.contentHash) {
+      throw new EscrowError('InvalidContentHash', 'A digital order needs the SHA-256 of its file.');
+    }
     // The deal row does not exist yet: the seller is whoever signs.
-    return build.createOrder({ seller: signer, dealId, amount: action.amount, contentHash: action.contentHash });
+    return build.createOrder({ seller: signer, dealId, amount: action.amount, kind: action.kind, contentHash: action.contentHash });
   }
 
   const deal = await getDeal(dealId);
@@ -35,11 +36,28 @@ export async function instructionsFor(action: EscrowAction): Promise<Transaction
       return build.confirmHandover({ ...ref, buyer: signer });
     case 'release_after_deadline':
       return build.releaseAfterDeadline({ ...ref, caller: signer });
-    case 'refund_after_deadline': {
-      // The refund goes to the order's buyer, read from the chain, not to the caller.
-      const order = await getEscrow().fetchOrder(deal.seller, dealId);
-      if (!order?.buyer) throw new EscrowError('InvalidStatus', 'Nobody has paid for this order.');
-      return build.refundAfterDeadline({ ...ref, buyer: order.buyer, caller: signer });
-    }
+    case 'refund_after_deadline':
+      return build.refundAfterDeadline({ ...ref, buyer: await onChainBuyer(deal.seller, dealId), caller: signer });
+
+    // In-person
+    case 'fund_and_schedule':
+      return build.fundAndSchedule({ ...ref, buyer: signer, meetingTime: action.meetingTime, placeHash: action.placeHash });
+    case 'accept_meeting':
+      return build.acceptMeeting(ref);
+    case 'decline_meeting':
+      return build.declineMeeting({ ...ref, buyer: await onChainBuyer(deal.seller, dealId) });
+    case 'refund_unaccepted':
+      return build.refundUnaccepted({ ...ref, buyer: await onChainBuyer(deal.seller, dealId), caller: signer });
+    case 'reject_at_meeting':
+      return build.rejectAtMeeting({ ...ref, buyer: signer });
+    case 'seller_cancel':
+      return build.sellerCancel({ ...ref, buyer: await onChainBuyer(deal.seller, dealId) });
   }
+}
+
+/** Refunds go to the order's buyer as recorded on-chain, never to whoever calls. */
+async function onChainBuyer(seller: string, dealId: string): Promise<string> {
+  const order = await getEscrow().fetchOrder(seller, dealId);
+  if (!order?.buyer) throw new EscrowError('InvalidStatus', 'Nobody has paid for this order.');
+  return order.buyer;
 }

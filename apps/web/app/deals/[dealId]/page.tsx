@@ -6,6 +6,7 @@ import { getOrder } from '@/lib/escrow/server';
 import { formatClp, formatFileSize } from '@/lib/format';
 import SiteHeader from '../../site-header';
 import { BuyerPanel } from './buyer-panel';
+import { MeetingPanel } from './meeting-panel';
 import DevnetSigning from './devnet-signing';
 
 export const metadata: Metadata = { title: 'Venta | Closeby' };
@@ -59,9 +60,18 @@ export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>)
             {deal.file_size ? ` · ${formatFileSize(deal.file_size)}` : ''}
           </p>
         )}
-        {deal.communes.length > 0 && <p className="muted">Encuentro en: {deal.communes.join(', ')}</p>}
+        {deal.communes.length > 0 && <p className="muted">Se junta en: {deal.communes.join(', ')}</p>}
 
         {deal.kind === 'digital' && <BuyerPanel dealId={dealId} priceClp={deal.price_clp} order={order} />}
+        {deal.kind === 'physical' && (
+          <MeetingPanel
+            dealId={dealId}
+            priceClp={deal.price_clp}
+            order={order}
+            communes={deal.communes}
+            availability={deal.time_slots[0]?.label ?? null}
+          />
+        )}
         {/* Picks up the other party's actions (e.g. the buyer paying while the seller watches). */}
         {!finished && <AutoRefresh />}
       </main>

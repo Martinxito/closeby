@@ -71,6 +71,9 @@ type MockOrderRow = {
   status: Order['status'];
   claim_deadline: number | null;
   release_deadline: number | null;
+  meeting_time: number | null;
+  place_hash: string | null;
+  accept_deadline: number | null;
   last_signature: string | null;
 };
 
@@ -85,6 +88,9 @@ function fromRow(row: MockOrderRow): Order {
     status: row.status,
     claimDeadline: row.claim_deadline === null ? null : Number(row.claim_deadline),
     releaseDeadline: row.release_deadline === null ? null : Number(row.release_deadline),
+    meetingTime: row.meeting_time === null ? null : Number(row.meeting_time),
+    placeHash: row.place_hash,
+    acceptDeadline: row.accept_deadline === null ? null : Number(row.accept_deadline),
     lastSignature: row.last_signature,
   };
 }
@@ -100,6 +106,9 @@ function toRow(order: Order): MockOrderRow & { updated_at: string } {
     status: order.status,
     claim_deadline: order.claimDeadline,
     release_deadline: order.releaseDeadline,
+    meeting_time: order.meetingTime,
+    place_hash: order.placeHash,
+    accept_deadline: order.acceptDeadline,
     last_signature: order.lastSignature,
     updated_at: new Date().toISOString(),
   };
