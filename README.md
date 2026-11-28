@@ -77,7 +77,7 @@ Every rule is a `require!` with a custom error (`NotBuyer`, `ClaimWindowClosed`,
 
 Users never hold SOL and never see a signing pop-up:
 
-- **Embedded wallet**: each user gets a Solana keypair behind a normal login (`apps/web/lib/wallet`). Screens only use the `Wallet` interface, so the provider can change without touching them ([decision 0003](docs/decisions/0003-invisible-wallet.md)).
+- **Embedded wallet**: each user logs in with email or Google through **Privy** and gets a Solana embedded wallet; transactions are signed in the background with no wallet UI ([`privy-provider.tsx`](apps/web/lib/wallet/privy-provider.tsx)). The server verifies the Privy access token and reads the user's wallet address from Privy, never from the browser ([`lib/auth/privy.ts`](apps/web/lib/auth/privy.ts)). Screens only use the `Wallet` interface, so the provider can change without touching them ([decision 0003](docs/decisions/0003-invisible-wallet.md)).
 - **Fee-payer relay** ([`apps/web/lib/solana/relay.ts`](apps/web/lib/solana/relay.ts)): for every action our server builds the transaction with our fee payer and returns it unsigned with an **HMAC ticket** over the message. The user's wallet signs it in the background, and the server co-signs **only if the message is byte-for-byte what it built and the logged-in user signed it** ([`ticket.ts`](apps/web/lib/solana/ticket.ts), tested against tampering such as a transfer that would drain the fee payer). Then it sends the transaction and waits for confirmation.
 - **Client**: [`solana/client`](solana/client) builds every instruction from the IDL (`accountsStrict`) and reads orders in the web's shape; the web uses it from server code only.
 
@@ -173,7 +173,8 @@ pnpm --filter @closeby/web dev                  # http://localhost:3000
 | `SOLANA_RPC_URL` | `https://api.devnet.solana.com` |
 | `USDC_MINT` | The mint the program's config was initialized with (table above) |
 | `FEE_PAYER_SECRET_KEY` | Base58 secret key of the fee payer. Must be that mint's authority |
-| `WALLET_MODE` | `mock` (default): test users with a Devnet keypair kept in the browser. `privy` once the provider is wired in |
+| `WALLET_MODE`, `NEXT_PUBLIC_WALLET_MODE` | `privy`: email or Google login with a Privy Solana embedded wallet. `mock` (default): test users with a Devnet keypair kept in the browser. Same value in both |
+| `NEXT_PUBLIC_PRIVY_APP_ID`, `PRIVY_APP_SECRET` | Privy app ID (public) and secret (server-only), for `privy` mode |
 | `MOCK_AUTH_SECRET`, `RELAY_TICKET_SECRET` | Optional; derived from the Supabase key and the fee payer by default |
 
 To create your own fee payer and test mint instead, run `pnpm --filter @closeby/web setup:devnet`. It writes them to `.env.local`; if the airdrop is refused, fund the printed address at https://faucet.solana.com. A new mint needs its own program deployment and `init_config`, because the config is locked to one mint.
@@ -206,7 +207,7 @@ pnpm --filter @closeby/web build
 ## Status and next steps
 
 - **Working on Devnet**: the full digital flow above, with users who hold no SOL.
-- **Login**: the demo uses test accounts with a real Devnet keypair kept in the browser. Privy (Google or email login with an embedded wallet) plugs in behind the same `Wallet` interface. Pollar was evaluated and ruled out because its managed Solana wallets cannot sign custom program instructions ([decision 0003](docs/decisions/0003-invisible-wallet.md)).
+- **Login**: email or Google through **Privy**, with a Solana embedded wallet created on first login and signing in the background (no pop-ups), verified end to end on Devnet. A test-wallet mode remains for local development. Pollar was evaluated and ruled out because its managed Solana wallets cannot sign custom program instructions ([decision 0003](docs/decisions/0003-invisible-wallet.md)).
 - **Next**: in-person sales on the same program ([proposal](docs/in-person-proposal.md)), disputes with a mediator, real USDC with a CLP on-ramp, and fresh keys and an audit before any mainnet use.
 
 ## Team

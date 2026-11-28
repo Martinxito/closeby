@@ -3,11 +3,12 @@
 //
 // WALLET_MODE selects how tokens are verified:
 //   - "mock" (default): tokens signed by our server at mock login (./mock-token.ts).
-//   - "privy": Privy access tokens. Diego wires this in with the Privy provider:
-//     verify the token with Privy's server SDK and return the user's Solana address.
+//   - "privy": Privy access tokens, verified with Privy's server SDK; the address is the
+//     user's Solana embedded wallet as Privy reports it (./privy.ts).
 import 'server-only';
 
 import { verifyMockToken } from './mock-token';
+import { authenticatePrivy } from './privy';
 
 export function walletMode(): 'mock' | 'privy' {
   return process.env.WALLET_MODE === 'privy' ? 'privy' : 'mock';
@@ -24,10 +25,6 @@ export async function authenticate(request: Request): Promise<string | null> {
 export async function authenticateToken(token: string | null | undefined): Promise<string | null> {
   if (!token) return null;
 
-  if (walletMode() === 'privy') {
-    // TODO(Diego, Privy): verify `token` with Privy's server SDK and return the
-    // linked Solana embedded wallet address. Until then, fail closed.
-    return null;
-  }
+  if (walletMode() === 'privy') return authenticatePrivy(token);
   return verifyMockToken(token);
 }

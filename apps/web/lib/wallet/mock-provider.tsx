@@ -4,23 +4,23 @@
 // "Login" asks our server for a test user (a real Devnet test keypair) and a signed
 // session token, and keeps them in this browser, so two browsers (or a normal and a
 // private window) act as two users. It signs real Devnet transactions in chain mode.
-// Diego replaces this file with the Privy provider, keeping the Wallet type.
+// Used when NEXT_PUBLIC_WALLET_MODE is not "privy" (see ./index.ts and ./privy-provider.tsx).
 
 import { Keypair, VersionedTransaction } from '@solana/web3.js';
 import { Buffer } from 'buffer';
 import bs58 from 'bs58';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { WalletContext } from './context';
 import { startMockSession } from './mock-session';
 import type { Wallet } from './types';
 import { UserError } from '../user-error';
 
 // v3: sessions now carry a Devnet test keypair (older sessions are logged out).
 const STORAGE_KEY = 'closeby.mockWallet.v3';
-const WalletContext = createContext<Wallet | null>(null);
 
 type StoredUser = { address: string; label: string; token: string; secretKey: string };
 
-export function WalletProvider({ children }: { children: ReactNode }) {
+export function MockWalletProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<StoredUser | null>(null);
 
@@ -75,11 +75,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   return <WalletContext.Provider value={wallet}>{children}</WalletContext.Provider>;
 }
 
-export function useWallet(): Wallet {
-  const wallet = useContext(WalletContext);
-  if (!wallet) throw new Error('useWallet must be used inside <WalletProvider>.');
-  return wallet;
-}
 
 function readStored(): StoredUser | null {
   try {
