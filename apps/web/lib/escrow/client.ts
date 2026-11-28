@@ -13,6 +13,7 @@
 
 import type { Wallet } from '../wallet/types';
 import { EscrowError, type EscrowAction, type EscrowErrorCode } from './types';
+import { UserError } from '../user-error';
 
 const mode = process.env.NEXT_PUBLIC_ESCROW_MODE === 'chain' ? 'chain' : 'mock';
 
@@ -27,7 +28,7 @@ export async function sendEscrowAction(
   action: DistributiveOmit<EscrowAction, 'signer'>,
   wallet: Wallet,
 ): Promise<ActionOutcome> {
-  if (!wallet.address) throw new Error('Log in before acting on a deal.');
+  if (!wallet.address) throw new UserError('Entra para continuar.');
   const token = await wallet.getAccessToken();
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` };
 

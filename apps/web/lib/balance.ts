@@ -1,5 +1,6 @@
 // Browser helpers for the test balance (app/api/balance/route.ts).
 import type { Wallet } from './wallet/types';
+import { UserError } from './user-error';
 
 export type Balance = { balanceUnits: number; balanceClp: number };
 
@@ -14,9 +15,10 @@ export async function addTestFunds(wallet: Wallet): Promise<Balance> {
 
 async function call(method: 'GET' | 'POST', wallet: Wallet): Promise<Balance> {
   const token = await wallet.getAccessToken();
-  if (!token) throw new Error('Entra para ver tu saldo.');
+  if (!token) throw new UserError('Entra para ver tu saldo.');
   const response = await fetch('/api/balance', { method, headers: { Authorization: `Bearer ${token}` } });
   const body = (await response.json()) as Balance | { error: { message: string } };
-  if ('error' in body) throw new Error(body.error.message);
+  // Our balance route answers in Spanish, written for the user.
+  if ('error' in body) throw new UserError(body.error.message);
   return body;
 }

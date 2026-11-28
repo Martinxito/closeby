@@ -15,6 +15,7 @@ import { availableActions, canDownload } from '@/lib/escrow/rules';
 import { EscrowError, type EscrowActionType, type EscrowErrorCode, type Order } from '@/lib/escrow/types';
 import { formatClp } from '@/lib/format';
 import { useWallet } from '@/lib/wallet';
+import { friendlyMessage } from '@/lib/user-error';
 
 type Props = { dealId: string; priceClp: number; order: Order | null };
 
@@ -25,6 +26,7 @@ const ERRORS: Partial<Record<EscrowErrorCode, string>> = {
   ClaimWindowClosed: 'Se acabó el plazo para desbloquear el archivo.',
   InsufficientFunds: 'No tienes saldo suficiente. Carga saldo de prueba en la página de inicio.',
   DeadlineNotReached: 'Todavía no se cumple el plazo.',
+  Unauthorized: 'Tu sesión expiró. Vuelve a entrar.',
 };
 
 export function BuyerPanel({ dealId, priceClp, order }: Props) {
@@ -51,7 +53,7 @@ export function BuyerPanel({ dealId, priceClp, order }: Props) {
       await sendEscrowAction({ type, dealId }, wallet);
       setConfirmingUnlock(false);
     } catch (err) {
-      setError(err instanceof EscrowError ? (ERRORS[err.code] ?? 'No pudimos completar la acción.') : messageOf(err));
+      setError(err instanceof EscrowError ? (ERRORS[err.code] ?? 'No pudimos completar la acción. Intenta de nuevo.') : friendlyMessage(err));
     } finally {
       setBusy(null);
       router.refresh(); // re-read the order from the escrow in every case
@@ -64,7 +66,7 @@ export function BuyerPanel({ dealId, priceClp, order }: Props) {
     try {
       await downloadPurchasedFile(dealId, wallet);
     } catch (err) {
-      setError(messageOf(err));
+      setError(friendlyMessage(err));
     } finally {
       setBusy(null);
     }
@@ -233,6 +235,3 @@ function countdown(deadline: number | null, now: number): string {
   return minutes > 0 ? `${minutes} min ${String(seconds).padStart(2, '0')} s` : `${seconds} s`;
 }
 
-function messageOf(err: unknown): string {
-  return err instanceof Error && err.message ? err.message : 'Algo salió mal. Intenta de nuevo.';
-}

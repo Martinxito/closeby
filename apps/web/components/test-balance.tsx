@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { addTestFunds, fetchBalance, type Balance } from '@/lib/balance';
 import { formatClp } from '@/lib/format';
+import { friendlyMessage } from '@/lib/user-error';
 import { useWallet } from '@/lib/wallet';
 
 /** "Tu saldo" card with the "Cargar saldo de prueba" button. Renders nothing when logged out. */
@@ -17,7 +18,7 @@ export function TestBalance() {
       setBalance(await fetchBalance(wallet));
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No pudimos revisar tu saldo.');
+      setError(friendlyMessage(err, 'No pudimos revisar tu saldo.'));
     }
   }, [wallet]);
 
@@ -44,7 +45,7 @@ export function TestBalance() {
     try {
       setBalance(await addTestFunds(wallet));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No pudimos cargar tu saldo.');
+      setError(friendlyMessage(err, 'No pudimos cargar tu saldo.'));
     } finally {
       setLoading(false);
     }

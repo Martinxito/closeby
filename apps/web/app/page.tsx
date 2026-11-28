@@ -48,7 +48,6 @@ export default function HomePage() {
       </main>
       <footer className="page-width site-footer">
         <Link href="/" className="wordmark" aria-label="Closeby, inicio">closeby<span className="brand-dot" aria-hidden="true">.</span></Link>
-        <Link href="/deals/devnet-signing" className="nav-link">Prueba de firma <span aria-hidden="true">↗</span></Link>
       </footer>
     </>
   );

@@ -12,6 +12,7 @@ import bs58 from 'bs58';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { startMockSession } from './mock-session';
 import type { Wallet } from './types';
+import { UserError } from '../user-error';
 
 // v3: sessions now carry a Devnet test keypair (older sessions are logged out).
 const STORAGE_KEY = 'closeby.mockWallet.v3';
@@ -47,7 +48,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Only the user's own signature is added; our server adds the fee payer's.
   const signTransaction = useCallback(
     async (transactionBase64: string): Promise<string> => {
-      if (!secretKey) throw new Error('Log in first.');
+      if (!secretKey) throw new UserError('Entra para continuar.');
       const tx = VersionedTransaction.deserialize(Buffer.from(transactionBase64, 'base64'));
       tx.sign([Keypair.fromSecretKey(bs58.decode(secretKey))]);
       return Buffer.from(tx.serialize()).toString('base64');

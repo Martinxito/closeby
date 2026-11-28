@@ -14,7 +14,6 @@ export default function SiteHeader({ deal = false }: { deal?: boolean }) {
           <nav aria-label="Navegación principal">
             <a href="#como-funciona" className="nav-link nav-explainer">Cómo funciona</a>
             <Link href="/vender" className="nav-link">Vender <span aria-hidden="true">↗</span></Link>
-            <Link href="/deals/devnet-signing" className="nav-link nav-test">Prueba de firma <span aria-hidden="true">↗</span></Link>
           </nav>
         )}
       </div>

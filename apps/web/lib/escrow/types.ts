@@ -61,7 +61,9 @@ export type EscrowErrorCode =
   | 'DeadlineNotReached'
   | 'PhysicalNotSupported'
   // Not a program error: the buyer's test USDC balance is below the price (chain mode).
-  | 'InsufficientFunds';
+  | 'InsufficientFunds'
+  // Missing or expired session (our routes), or not the upgrade authority (program).
+  | 'Unauthorized';
 
 export class EscrowError extends Error {
   constructor(
