@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" width="1100" height="540" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title>Closeby architecture</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c203b"/>
+    </marker>
+  </defs>
+  <rect width="1100" height="540" rx="16" fill="#ffffff"/>
+  <text x="40" y="44" font-size="24" font-weight="700" fill="#1c203b">Architecture</text>
+  <text x="40" y="70" font-size="15" fill="#505875">The browser never holds secrets or talks to the database. The program alone moves money.</text>
+
+  <!-- Browser -->
+  <rect x="40" y="100" width="300" height="330" rx="16" fill="#eef0ff" stroke="#4d47a7" stroke-width="2"/>
+  <text x="60" y="132" font-size="18" font-weight="700" fill="#1c203b">Phone browser</text>
+  <text x="60" y="152" font-size="13" fill="#505875">Next.js pages · apps/web/app</text>
+  <g font-size="13" fill="#1c203b">
+    <text x="60" y="188">• /vender: publish a file</text>
+    <text x="60" y="210">• /deals/[id]: buy, unlock, download,</text>
+    <text x="72" y="228">"Recibí el archivo"</text>
+    <text x="60" y="256">• Embedded wallet signs in the</text>
+    <text x="72" y="274">background, no pop-ups</text>
+    <text x="72" y="292" fill="#505875">lib/wallet (Privy; test wallet for now)</text>
+    <text x="60" y="320">• Prices in CLP, no crypto words</text>
+    <text x="60" y="348">• Hashes the file (SHA-256) before</text>
+    <text x="72" y="366">publishing</text>
+  </g>
+
+  <!-- Server -->
+  <rect x="400" y="100" width="320" height="330" rx="16" fill="#f7f8fd" stroke="#1c203b" stroke-width="2"/>
+  <text x="420" y="132" font-size="18" font-weight="700" fill="#1c203b">Next.js server (Vercel)</text>
+  <text x="420" y="152" font-size="13" fill="#505875">Route handlers and server actions</text>
+  <g font-size="13" fill="#1c203b">
+    <text x="420" y="188">• Who is calling: verified session token</text>
+    <text x="432" y="206" fill="#505875">lib/auth/server.ts</text>
+    <text x="420" y="234">• Fee-payer relay: builds the transaction,</text>
+    <text x="432" y="252">returns it with an HMAC ticket, co-signs</text>
+    <text x="432" y="270">only what it built</text>
+    <text x="432" y="288" fill="#505875">lib/solana/relay.ts · ticket.ts</text>
+    <text x="420" y="316">• Escrow instructions and order reads</text>
+    <text x="432" y="334" fill="#505875">solana/client (Anchor IDL)</text>
+    <text x="420" y="362">• Buyer-only 5-minute download links,</text>
+    <text x="432" y="380">only after open_delivery on-chain</text>
+    <text x="420" y="408">• Test balance faucet (Devnet)</text>
+  </g>
+
+  <!-- Solana -->
+  <rect x="780" y="100" width="280" height="206" rx="16" fill="#e7f6ec" stroke="#15803d" stroke-width="2"/>
+  <text x="800" y="132" font-size="18" font-weight="700" fill="#14532d">Solana Devnet</text>
+  <text x="800" y="152" font-size="13" fill="#15803d">closeby_escrow · 4vaVc…ugT</text>
+  <g font-size="13" fill="#1c203b">
+    <text x="800" y="186">• Order PDA</text>
+    <text x="812" y="204" fill="#505875">["order", seller, order_id]</text>
+    <text x="800" y="230">• Vault: the order PDA's USDC</text>
+    <text x="812" y="248">account; only the program</text>
+    <text x="812" y="266">can move it</text>
+    <text x="800" y="290">• Config: USDC mint, windows</text>
+  </g>
+
+  <!-- Supabase -->
+  <rect x="780" y="320" width="280" height="150" rx="16" fill="#fff4e5" stroke="#b45309" stroke-width="2"/>
+  <text x="800" y="352" font-size="18" font-weight="700" fill="#7c2d12">Supabase</text>
+  <text x="800" y="372" font-size="13" fill="#b45309">Secret key, server only</text>
+  <g font-size="13" fill="#1c203b">
+    <text x="800" y="402">• deals: title, price, file metadata</text>
+    <text x="800" y="424">• files bucket: private (the goods)</text>
+    <text x="800" y="446">• previews bucket: public samples</text>
+  </g>
+
+  <!-- Arrows browser <-> server -->
+  <line x1="340" y1="200" x2="396" y2="200" stroke="#1c203b" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="398" y1="232" x2="344" y2="232" stroke="#1c203b" stroke-width="2" marker-end="url(#a)"/>
+  <!-- server -> solana -->
+  <line x1="720" y1="200" x2="776" y2="200" stroke="#15803d" stroke-width="2" marker-end="url(#a)"/>
+  <!-- server -> supabase -->
+  <line x1="720" y1="390" x2="776" y2="390" stroke="#b45309" stroke-width="2" marker-end="url(#a)"/>
+  <!-- browser -> storage direct upload -->
+  <path d="M 315 430 Q 315 505 520 505 L 920 505 Q 940 505 940 474" fill="none" stroke="#b45309" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="620" y="497" font-size="12" fill="#7c2d12" text-anchor="middle">file upload straight to storage with a one-time signed URL (never through Vercel)</text>
+
+  <!-- Action legend -->
+  <rect x="40" y="446" width="262" height="40" rx="8" fill="#ffffff" stroke="#d7dbef"/>
+  <text x="52" y="463" font-size="12" fill="#1c203b">One action = prepare → user signs</text>
+  <text x="52" y="479" font-size="12" fill="#1c203b">→ submit → confirmed on-chain</text>
+</svg>
