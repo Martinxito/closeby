@@ -101,7 +101,7 @@ export async function publishSale(input: PublishSaleInput): Promise<Result<{ dea
 
   try {
     // 1. The escrow order must exist, belong to this seller, and match price and file.
-    const order = await getOrder(input.dealId);
+    const order = await getOrder(input.dealId, seller); // seller from the session: the deal row does not exist yet
     if (!order || order.seller !== seller) return { ok: false, error: 'No encontramos tu venta. Intenta de nuevo.' };
     if (order.amount !== clpToUsdcUnits(input.priceClp)) return { ok: false, error: 'El precio no coincide con tu venta.' };
 

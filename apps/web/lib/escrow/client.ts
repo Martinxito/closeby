@@ -3,38 +3,57 @@
 //
 // NEXT_PUBLIC_ESCROW_MODE must match the server's ESCROW_MODE ("mock" by default).
 // It is public on purpose: it only says which backend to talk to, it is not a secret.
+//
+// Chain mode, one action:
+//   1. POST /api/escrow/prepare → unsigned transaction (our fee payer pays) + ticket
+//   2. wallet.signTransaction   → the user's embedded wallet signs, no pop-up
+//   3. POST /api/escrow/submit  → our server checks it, adds the fee payer, sends, confirms
+// Afterwards the screen re-reads the order on-chain (router.refresh): a wallet callback
+// alone is never treated as confirmation.
 
 import type { Wallet } from '../wallet/types';
-import { EscrowError, type ActionResult, type EscrowAction, type EscrowErrorCode } from './types';
+import { EscrowError, type EscrowAction, type EscrowErrorCode } from './types';
 
 const mode = process.env.NEXT_PUBLIC_ESCROW_MODE === 'chain' ? 'chain' : 'mock';
 
+/** What a completed action returns: the transaction signature (fake in mock mode). */
+export type ActionOutcome = { signature: string | null };
+
 /**
- * Runs one escrow action as the logged-in user. The action's `signer` is filled in
- * from the wallet, so a screen cannot act on behalf of someone else by mistake.
+ * Runs one escrow action as the logged-in user. The server takes the signer from the
+ * session token, so a screen cannot act on behalf of someone else.
  */
 export async function sendEscrowAction(
   action: DistributiveOmit<EscrowAction, 'signer'>,
   wallet: Wallet,
-): Promise<ActionResult> {
+): Promise<ActionOutcome> {
   if (!wallet.address) throw new Error('Log in before acting on a deal.');
-  const full = { ...action, signer: wallet.address } as EscrowAction;
+  const token = await wallet.getAccessToken();
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` };
 
   if (mode === 'chain') {
-    // Block 4: build the Anchor instruction, have our server add the fee payer,
-    // sign with wallet.signTransaction, send, then re-read the order on-chain.
-    throw new Error('Chain mode is not implemented yet.');
+    const prepared = await post<{ transaction: string; ticket: string }>('/api/escrow/prepare', headers, action);
+    const signed = await wallet.signTransaction(prepared.transaction);
+    const { signature } = await post<{ signature: string }>('/api/escrow/submit', headers, {
+      transaction: signed,
+      ticket: prepared.ticket,
+    });
+    return { signature };
   }
 
-  const token = await wallet.getAccessToken();
-  const response = await fetch('/api/escrow/mock', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-    body: JSON.stringify(full),
-  });
-  const body = (await response.json()) as ActionResult | { error: { code: string; message: string } };
-  if ('error' in body) throw new EscrowError(body.error.code as EscrowErrorCode, body.error.message);
-  return body;
+  const result = await post<{ order: { lastSignature: string | null } }>('/api/escrow/mock', headers, action);
+  return { signature: result.order.lastSignature };
+}
+
+async function post<T>(url: string, headers: Record<string, string>, body: unknown): Promise<T> {
+  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  const json = (await response.json().catch(() => ({ error: { code: 'Internal', message: 'Bad response' } }))) as
+    | T
+    | { error: { code: string; message: string } };
+  if (json && typeof json === 'object' && 'error' in json) {
+    throw new EscrowError(json.error.code as EscrowErrorCode, json.error.message);
+  }
+  return json as T;
 }
 
 // Omit that works on each member of a union (plain Omit collapses the union).

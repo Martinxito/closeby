@@ -23,6 +23,7 @@ const ERRORS: Partial<Record<EscrowErrorCode, string>> = {
   InvalidStatus: 'La venta cambió mientras tanto. Ya la actualizamos.',
   NotBuyer: 'Solo quien compró puede hacer esto.',
   ClaimWindowClosed: 'Se acabó el plazo para desbloquear el archivo.',
+  InsufficientFunds: 'No tienes saldo suficiente. Carga saldo de prueba en la página de inicio.',
   DeadlineNotReached: 'Todavía no se cumple el plazo.',
 };
 

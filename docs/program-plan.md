@@ -125,6 +125,8 @@ To check the program itself at any time: `pnpm --filter @closeby/solana smoke:de
 
 Found by comparing `apps/web` with the program on Sat 28 Nov, 02:00. Owner: Martín, with Alex (his task 4).
 
+**Status (Sat 28 Nov, 09:45):** gaps 1, 2 and 4 closed by the chain-mode PR (`feat/web-chain-mode`). Verified on Devnet through the web's server path: create → fund → unlock → confirm, seller paid exactly the amount, seller confirming instead of the buyer refused with `NotBuyer`, users with no SOL.
+
 | # | Gap | Where | Fix |
 | --- | --- | --- | --- |
 | 1 | `getOrder(dealId)` cannot find an on-chain order: the PDA needs the seller too (`["order", seller, order_id LE]`) | `lib/escrow/server.ts`; callers in `app/vender/actions.ts` (order read before the deal row exists), `app/vender/[dealId]/page.tsx`, `app/deals/[dealId]/page.tsx`, `app/api/deals/[dealId]/download/route.ts` | Change to `getOrder(dealId, seller)` and call `escrow.fetchOrder(seller, dealId)`. In `publishSale` the seller comes from the session; elsewhere read the deal first, then the order |

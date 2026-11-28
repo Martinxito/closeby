@@ -3,10 +3,12 @@
 // ESCROW_MODE selects the backend:
 //   - "mock" (default until the program is on Devnet): orders live in Supabase
 //     `mock_orders` and the rules in ./rules.ts are applied here.
-//   - "chain": orders are read from the Solana program. Not implemented yet (block 4).
+//   - "chain": orders are read from the Solana program (./chain.ts). Actions are
+//     transactions the user signs, built and relayed by /api/escrow/prepare and /submit.
 import 'server-only';
 
 import { getSupabase } from '../supabase';
+import { fetchChainOrder } from './chain';
 import { nowSecs } from './ids';
 import { applyAction } from './rules';
 import { DEMO_CONFIG, EscrowError, type ActionResult, type EscrowAction, type Order } from './types';
@@ -17,9 +19,13 @@ export function escrowMode(): EscrowMode {
   return process.env.ESCROW_MODE === 'chain' ? 'chain' : 'mock';
 }
 
-/** Current state of the order behind a deal, or null if there is none. */
-export async function getOrder(dealId: string): Promise<Order | null> {
-  if (escrowMode() === 'chain') throw new Error('Chain mode is not implemented yet.');
+/**
+ * Current state of the order behind a deal, or null if there is none.
+ * `seller` is required in chain mode: the order's address is derived from it. Pass it
+ * from the deal row, or from the session when the deal row does not exist yet.
+ */
+export async function getOrder(dealId: string, seller: string | null): Promise<Order | null> {
+  if (escrowMode() === 'chain') return seller ? fetchChainOrder(dealId, seller) : null;
 
   const { data, error } = await getSupabase()
     .from('mock_orders')
@@ -38,7 +44,7 @@ export async function getOrder(dealId: string): Promise<Order | null> {
 export async function runMockAction(action: EscrowAction): Promise<ActionResult> {
   if (escrowMode() !== 'mock') throw new Error('Mock actions are disabled outside mock mode.');
 
-  const current = await getOrder(action.dealId);
+  const current = await getOrder(action.dealId, null); // mock rows are keyed by deal ID only
   const result = applyAction(current, action, nowSecs(), DEMO_CONFIG);
   const order = { ...result.order, lastSignature: fakeSignature() };
   const row = toRow(order);

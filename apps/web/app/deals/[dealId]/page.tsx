@@ -30,7 +30,9 @@ export default async function DealPage({ params }: PageProps<'/deals/[dealId]'>)
   }
 
   if (!isDealId(dealId)) notFound();
-  const [deal, order] = await Promise.all([getDeal(dealId), getOrder(dealId)]);
+  // Deal first: in chain mode the order's address is derived from its seller.
+  const deal = await getDeal(dealId);
+  const order = deal ? await getOrder(dealId, deal.seller) : null;
   if (!deal) notFound();
   const finished = order?.status === 'Released' || order?.status === 'Refunded';
 
